@@ -1,6 +1,8 @@
 #include "Game.h"
 #include "Constants.h"
 
+#include "Tetris.h"
+
 #include <iostream>
 
 Game::Game() : window(nullptr), renderer(nullptr)

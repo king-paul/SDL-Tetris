@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Tetris.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="libs\glm\common.hpp" />
@@ -403,6 +404,7 @@
     <ClInclude Include="libs\sol\sol.hpp" />
     <ClInclude Include="src\Constants.h" />
     <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\Tetris.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\detail\func_common.inl" />
