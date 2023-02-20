@@ -41,7 +41,8 @@ public:
 	~Tetris() 
 	{ 
 		if (m_currentPiece != nullptr)
-			delete m_currentPiece;
+			m_currentPiece = nullptr;
+			//delete m_currentPiece;
 	}
 	
 	void Update();

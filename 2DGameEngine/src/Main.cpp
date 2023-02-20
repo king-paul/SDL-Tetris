@@ -5,21 +5,20 @@
 
 int main(int argc, char* argv[]) 
 {
-    
-    Game* game = new Game();
+    Game* app = new Game();
 
-    game->Initialize(800, 600);
+    app->Initialize(800, 600);
 
-    while (game->IsRunning()) 
+    while (app->IsRunning())
     {
-        game->ProcessInput();
-        game->Update();
-        game->Render();
+        app->ProcessInput();
+        app->Update();
+        app->Render();
     }
 
-    game->Destroy();
+    app->Destroy();
 
-    delete game;
+    delete app;
 
     return 0;
 }

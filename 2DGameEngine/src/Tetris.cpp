@@ -115,8 +115,6 @@ void Tetris::Update()
 
 void Tetris::LoadNextPiece()
 {
-	//m_currentPiece = new Tetromino();
-
 	// seed the random generator
 	time_t theTime;
 	srand((unsigned int) time(&theTime));
