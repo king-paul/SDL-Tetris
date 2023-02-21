@@ -10,6 +10,9 @@ Game::Game() : window(nullptr), renderer(nullptr)
 	game = new Tetris();
 
 	game->LoadNextPiece();
+
+	alpha = 0;
+	fadeIn = true;
 }
 
 Game::~Game()
@@ -49,6 +52,9 @@ void Game::Initialize(int width, int height)
 
 	// create the renderer
 	renderer = SDL_CreateRenderer(window, -1, 0); // -1 = default driver index
+
+	// set blending mode for colour alpha channels
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
 
 	// make sure the renderer was created
 	if (!renderer) {
@@ -134,15 +140,12 @@ void Game::ProcessInput()
 
 void Game::Update()
 {
-	// Wait until 16ms has ellapsed since the last frame
-	//while (!SDL_TICKS_PASSED(SDL_GetTicks(), ticksLastFrame + FRAME_TARGET_TIME));
-
 	// Sleep the execution until we reach the target frame time in millisceonds
-	int timeToWait = FRAME_TARGET_TIME - (SDL_GetTicks() - ticksLastFrame);
+	/*int timeToWait = FRAME_TARGET_TIME - (SDL_GetTicks() - ticksLastFrame);
 	// Only call delay if we are too fast to prccess this frame
 	if (timeToWait > 0 && timeToWait <= FRAME_TARGET_TIME) {
 		SDL_Delay(timeToWait);
-	}
+	}*/
 
 	// Delta time is the difference in ticks from last frame converted to seconds
 	float deltaTime = (SDL_GetTicks() - ticksLastFrame) / 1000.0f;
@@ -151,7 +154,28 @@ void Game::Update()
 	deltaTime = (deltaTime > 0.05f) ? 0.05f : deltaTime;
 
 	// Sets the new ticks for the current ramt to be usind in the next pass
-	ticksLastFrame = SDL_GetTicks();
+	//ticksLastFrame = SDL_GetTicks();
+	if (game->FormedLines())
+	{
+		//SDL_Delay(1000); // delay a bit before clearing the lines
+		if (fadeCompleted)
+		{
+			game->ClearLinesFound();
+			fadeCompleted = false;
+		}
+	}
+	else
+	{
+		/* Update the tetris game */
+		game->Update();
+	}
+
+	if (!game->GameRunning())
+	{
+		isRunning = false;
+		std::cout << "Game Over!" << std::endl;
+		std::cout << "Your score is " << game->Score() << std::endl;
+	}
 
 }
 
@@ -164,7 +188,16 @@ void Game::Render()
 
 	/* draw graphics on screen */
 	DrawBoard();
-	DrawCurrentPiece();
+
+	if (game->FormedLines())
+	{
+		if(!fadeCompleted)
+			FadeLineDisplay();
+	}
+	else
+	{
+		DrawCurrentPiece();
+	}
 	/* end of graphics draw */
 
 	SDL_RenderPresent(renderer); // renders the frame in on the window
@@ -254,16 +287,33 @@ void Game::DrawBoard()
 		}
 	}
 
-	// draw bordered squares
-	SDL_SetRenderDrawColor(renderer, 127, 127, 127, 255); // grey
+	auto gameField = game->GetField();
+
+	// draw coloured squares
 	for (int y = 0; y < ROWS; y++)
 	{
 		for (int x = 0; x < COLS; x++)
 		{
-			if (game->GetBoardValue(x, y) == 9)
+			int boardValue = game->GetBoardValue(x, y);
+
+			if (boardValue != 0)
 			{
-				SDL_Rect borderSquare = { GRID_OFFSET_X +x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
-				SDL_RenderFillRect(renderer, &borderSquare);
+				switch (boardValue)
+				{
+					case 0:	break;
+					case 1: SetRenderColor(Color::RED); break;
+					case 2: SetRenderColor(Color::GREEN); break;
+					case 3: SetRenderColor(Color::BLUE); break;
+					case 4: SetRenderColor(Color::YELLOW); break;
+					case 5: SetRenderColor(Color::MAGENTA); break;
+					case 6: SetRenderColor(Color::CYAN); break;
+					case 7: SetRenderColor(Color::PURPLE); break;
+					case 8: SetRenderColor(Color::BLACK); break;
+					case 9: SetRenderColor(Color::GRAY); break;
+				}
+
+				SDL_Rect square = { GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
+				SDL_RenderFillRect(renderer, &square);
 			}
 		}
 	}
@@ -305,5 +355,41 @@ void Game::DrawCurrentPiece()
 	for (auto square : tetromino)
 	{
 		SDL_RenderFillRect(renderer, &square);
+	}
+}
+
+void Game::FadeLineDisplay()
+{
+	SDL_Delay(1);
+
+	if (fadeIn)
+		alpha++;
+	else
+		alpha--;
+
+	//std::cout << "Alpha: " << alpha << std::endl;
+
+	auto lines = game->GetLines();
+
+	// iterates through all rows where there is a line and fills them with a green rectangle
+	for (int i = 0; i < lines.size(); i++)
+	{
+		SDL_Rect line = { GRID_OFFSET_X + TILE_SIZE, GRID_OFFSET_Y + lines[i] * TILE_SIZE,
+						  TILE_SIZE * (FIELD_WIDTH - 2), TILE_SIZE};
+
+		SDL_SetRenderDrawColor(renderer, 0, 255, 0, alpha);		
+		SDL_RenderFillRect(renderer, &line);
+	}
+
+	if (alpha >= 255)
+	{
+		fadeIn = false;
+		alpha = 255;
+	}
+
+	if (!fadeIn && alpha <= 0)
+	{
+		fadeCompleted = true;
+		alpha = 0;
 	}
 }

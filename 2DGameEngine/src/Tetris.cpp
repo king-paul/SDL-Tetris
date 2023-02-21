@@ -1,4 +1,5 @@
 #include "Tetris.h"
+#include <SDL_timer.h>
 
 Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFieldHeight(fieldHeight)
 {
@@ -72,7 +73,7 @@ void Tetris::Update()
 		!PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY));
 
 	// Game Timing
-	this_thread::sleep_for(50ms); // Game Tick
+	SDL_Delay(50); // Game Tick
 	m_timer++;
 
 	// make piece fall down if timer reach the time limit for speed
@@ -247,8 +248,6 @@ void Tetris::ClearLinesFound()
 {
 	if (!m_linesFound.empty())
 	{
-		this_thread::sleep_for(400ms); // Delay a bit
-
 		for (int rowNum : m_linesFound)
 		{
 			// iterate through all lines above where the line was formed

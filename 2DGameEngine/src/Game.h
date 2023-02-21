@@ -54,6 +54,12 @@ private:
 	void DrawCurrentPiece();
 
 	void SetRenderColor(Color color);
+	void FadeLineDisplay();
+
+	// line display fading
+	int alpha = 0;
+	bool fadeIn = false;
+	bool fadeCompleted = false;
 
 public:	
 	Game();

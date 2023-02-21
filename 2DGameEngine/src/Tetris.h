@@ -55,7 +55,12 @@ public:
 
 	// getters
 	unsigned int GetBoardValue(int x, int y){ return m_playField[y][x]; }
+	array<array<int, FIELD_WIDTH>, FIELD_HEIGHT>* GetField() { return &m_playField; }
+
 	Tetromino* GetCurrentPiece() { return m_currentPiece; }
+	bool FormedLines() { return !m_linesFound.empty(); }
+	vector<int> GetLines() { return m_linesFound; }
+
 	int Score() { return m_score; }
 	int PiecesPlaced(){ return m_pieceCount; }
 	int LinesFormed() { return m_linesFormed; }
