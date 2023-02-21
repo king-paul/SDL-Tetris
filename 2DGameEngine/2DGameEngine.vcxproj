@@ -143,7 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Tetris.cpp" />
   </ItemGroup>
@@ -403,10 +403,12 @@
     <ClInclude Include="libs\lua\lualib.h" />
     <ClInclude Include="libs\sol\sol.hpp" />
     <ClInclude Include="src\Constants.h" />
-    <ClInclude Include="src\Game.h" />
+    <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Tetris.h" />
+    <ClInclude Include="src\Text.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="libfreetype-6.dll" />
     <None Include="libs\glm\detail\func_common.inl" />
     <None Include="libs\glm\detail\func_common_simd.inl" />
     <None Include="libs\glm\detail\func_exponential.inl" />
@@ -540,6 +542,10 @@
     <None Include="libs\glm\gtx\vector_query.inl" />
     <None Include="libs\glm\gtx\wrap.inl" />
     <None Include="SDL2.dll" />
+    <None Include="SDL2_ttf.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="assets\fonts\arial.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

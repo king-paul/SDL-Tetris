@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "Constants.h"
-#include "Game.h"
+#include "App.h"
 
 int main(int argc, char* argv[]) 
 {

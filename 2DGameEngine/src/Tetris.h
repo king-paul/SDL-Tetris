@@ -51,7 +51,7 @@ public:
 	void MovePieceLeft();
 	void MovePieceRight();
 	void MovePieceDown();
-	void ClearLinesFound();
+	void ClearLinesFound();	
 
 	// getters
 	unsigned int GetBoardValue(int x, int y){ return m_playField[y][x]; }

@@ -6,6 +6,7 @@
 #include <SDL_ttf.h>
 
 #include "Tetris.h"
+#include "Text.h"
 
 const int TILE_SIZE = 32;
 const int COLS = 12;
@@ -50,16 +51,25 @@ private:
 	// drawing options
 	bool showGrid = false;
 
+	// drawing functions
 	void DrawBoard();
 	void DrawCurrentPiece();
 
 	void SetRenderColor(Color color);
 	void FadeLineDisplay();
+	void DrawStats();
 
 	// line display fading
 	int alpha = 0;
 	bool fadeIn = false;
 	bool fadeCompleted = false;
+
+	// fonts & textures
+	TTF_Font* arial;
+	Text* scoreLabel;
+	Text* scoreValue;	
+	int textWidth;
+	int textHeight;
 
 public:	
 	Game();

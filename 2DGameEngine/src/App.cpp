@@ -1,7 +1,8 @@
-#include "Game.h"
+#include "App.h"
 #include "Constants.h"
 
 #include <iostream>
+#include <string>
 
 Game::Game() : window(nullptr), renderer(nullptr)
 {
@@ -12,12 +13,18 @@ Game::Game() : window(nullptr), renderer(nullptr)
 	game->LoadNextPiece();
 
 	alpha = 0;
-	fadeIn = true;
+	fadeIn = true;	
 }
 
 Game::~Game()
 {
 	delete game;
+
+	//SDL_DestroyTexture(scoreLabel);
+	delete scoreLabel;
+	delete scoreValue;
+
+	TTF_CloseFont(arial);	
 }
 
 bool Game::IsRunning() const
@@ -55,6 +62,33 @@ void Game::Initialize(int width, int height)
 
 	// set blending mode for colour alpha channels
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
+
+	// load fonts
+	int ttf = TTF_Init();
+
+	arial = TTF_OpenFont("assets/fonts/arial.ttf", 24);
+
+	if (ttf == -1 || arial == nullptr)
+	{
+		cout << TTF_GetError() << endl;
+	}
+
+	// create text assets
+	scoreLabel = new Text(renderer, arial, {255, 0, 0, 255}, 
+						  WINDOW_WIDTH / 2 + 10, GRID_OFFSET_Y);
+
+	scoreValue = new Text(renderer, arial, { 255, 255, 255, 255 },
+						  WINDOW_WIDTH / 2 + 100, GRID_OFFSET_Y);
+
+	/*
+	// create surface pointer
+	SDL_Surface* textLabel = TTF_RenderText_Blended(arial, "Score: ", { 255, 0, 0, 255 });
+
+	// create textures from text ;labels
+	scoreLabel = SDL_CreateTextureFromSurface(renderer, textLabel);
+
+	SDL_FreeSurface(textLabel);*/
+
 
 	// make sure the renderer was created
 	if (!renderer) {
@@ -124,8 +158,8 @@ void Game::ProcessInput()
 		break;
 		}
 
-		case SDL_KEYUP: {
-
+		case SDL_KEYUP: 
+		{
 			keyPressed = false;
 
 			//if (event.key.keysym.sym == SDLK_UP)
@@ -141,11 +175,11 @@ void Game::ProcessInput()
 void Game::Update()
 {
 	// Sleep the execution until we reach the target frame time in millisceonds
-	/*int timeToWait = FRAME_TARGET_TIME - (SDL_GetTicks() - ticksLastFrame);
+	int timeToWait = FRAME_TARGET_TIME - (SDL_GetTicks() - ticksLastFrame);
 	// Only call delay if we are too fast to prccess this frame
 	if (timeToWait > 0 && timeToWait <= FRAME_TARGET_TIME) {
 		SDL_Delay(timeToWait);
-	}*/
+	}
 
 	// Delta time is the difference in ticks from last frame converted to seconds
 	float deltaTime = (SDL_GetTicks() - ticksLastFrame) / 1000.0f;
@@ -198,6 +232,8 @@ void Game::Render()
 	{
 		DrawCurrentPiece();
 	}
+
+	DrawStats();
 	/* end of graphics draw */
 
 	SDL_RenderPresent(renderer); // renders the frame in on the window
@@ -392,4 +428,10 @@ void Game::FadeLineDisplay()
 		fadeCompleted = true;
 		alpha = 0;
 	}
+}
+
+void Game::DrawStats()
+{
+	scoreLabel->Draw("Score: ");
+	scoreValue->Draw(std::to_string(game->Score()).c_str());
 }
