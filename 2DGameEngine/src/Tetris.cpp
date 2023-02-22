@@ -1,5 +1,6 @@
 #include "Tetris.h"
 #include <SDL_timer.h>
+#include <iostream>
 
 Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFieldHeight(fieldHeight)
 {
@@ -75,18 +76,17 @@ Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFiel
 	LoadNextPiece(); // spawns the first tetris piece
 }
 
-void Tetris::Update()
+void Tetris::Update(float deltaTime)
 {
 	// check for game over by seeing if a piece at the top of the screen does not fit
 	m_gameOver = (m_currentPiece.posY == 0 &&
 		!PieceFits(&m_currentPiece.tiles, m_currentPiece.posX, m_currentPiece.posY));
 
 	// Game Timing
-	SDL_Delay(50); // Game Tick
-	m_timer++;
+	m_timer += deltaTime;
 
 	// make piece fall down if timer reach the time limit for speed
-	if (m_timer == m_fallTime)
+	if (m_timer >= (m_fallTime/10) || m_sendToBottom)
 	{
 		// if the the piece fits in the space below and move it down if it does
 		if (PieceFits(&m_currentPiece.tiles, m_currentPiece.posX, m_currentPiece.posY + 1))
@@ -97,17 +97,13 @@ void Tetris::Update()
 		{
 			AddPieceToBoard();
 
+			m_sendToBottom = false;
 			m_pieceCount++;
 
 			// if 10 pieces have been place since the start of the speed increases
 			if (m_pieceCount % 10 == 0)
 			{
-				// reduces the the time delay by 1 if it is atleast 10
-				if (m_fallTime >= 0)
-				{
-					m_fallTime -= 2;
-					m_level++;
-				}
+				IncreaseLevel();
 			}
 
 			m_score += 25;
@@ -120,6 +116,20 @@ void Tetris::Update()
 				LoadNextPiece();
 		}
 		m_timer = 0;
+	}
+}
+
+void Tetris::IncreaseLevel()
+{
+	if (m_fallTime > 1)
+	{
+		m_fallTime--;
+		m_level++;
+	}
+	else if (m_fallTime > 0.5f)
+	{
+		m_fallTime -= 0.1f;
+		m_level++;
 	}
 }
 

@@ -43,13 +43,15 @@ public:
 
 	}
 	
-	void Update();
+	void Update(float deltaTime);
 	void LoadNextPiece();	
 	void RotateCurrentPiece();
 	void MovePieceLeft();
 	void MovePieceRight();
 	void MovePieceDown();
 	void ClearLinesFound();	
+
+	void IncreaseLevel();
 
 	// getters
 	unsigned int GetBoardValue(int x, int y){ return m_playField[y][x]; }
@@ -62,7 +64,10 @@ public:
 	int PiecesPlaced(){ return m_pieceCount; }
 	int LinesFormed() { return m_linesFormed; }
 	int Level() { return m_level; }
-	bool GameRunning() { return !m_gameOver; }
+	bool GameOver() { return m_gameOver; }
+
+	// setters
+	void SendPieceToBottom() { m_sendToBottom = true; }
 
 	/// <summary>
 	/// Checks whether or not a tetromino with a specified orientation will fit
@@ -91,13 +96,14 @@ private:
 
 	array<array<int, FIELD_WIDTH>, FIELD_HEIGHT> m_playField; // stores the game board
 
-	int m_fallTime = 20; // the speed in which tetrominos fall
-	int m_timer = 0; // the time between each descent of tetromino
+	float m_fallTime = 10; // the speed in which tetrominos fall
+	float m_timer = 0; // the time between each descent of tetromino
 	int m_pieceCount = 0; // how many pieces have fallen in the game
 	int m_score = 0; // the player's current score
-	int m_linesFormed = 0;
-	int m_level = 1;
+	int m_linesFormed = 0; // the total number of lines the player has formed
+	int m_level = 1; // the level of the game based on number of times the speed has increased
 
+	bool m_sendToBottom = false;
 	bool m_gameOver = false;
 
 	vector<int> m_linesFound; // stores row numbers where lines have been formed

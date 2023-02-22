@@ -9,9 +9,10 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 	InitializeSDL(width, height);
 
 	// load fonts
-	arial = TTF_OpenFont("assets/fonts/arial.ttf", 24);
+	arial_24 = TTF_OpenFont("assets/fonts/arial.ttf", 24);
+	arial_48 = TTF_OpenFont("assets/fonts/arial.ttf", 48);
 
-	if (arial == nullptr)
+	if (arial_24 == nullptr || arial_48 == nullptr)
 	{
 		cout << TTF_GetError() << endl;
 	}
@@ -27,19 +28,23 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 	nextPieceBorder = { MARGIN_LEFT, MARGIN_TOP + 32, borderWith, borderHeight };
 
 	// create text lebels
-	nextPieceLabel = new Text(renderer, arial, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE");
+	nextPieceLabel = new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE");
 
-	scoreLabel = new Text(renderer, arial, Color::RED, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE:");
-	scoreValue = new Text(renderer, arial, Color::WHITE, MARGIN_LEFT + 100, MARGIN_TOP + borderHeight + 64);	
+	scoreLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE:");
+	scoreValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 100, MARGIN_TOP + borderHeight + 64);	
 
-	levelLabel = new Text(renderer, arial, Color::RED, MARGIN_LEFT, MARGIN_TOP + borderHeight + 128, "Level:");
-	levelValue = new Text(renderer, arial, Color::WHITE, MARGIN_LEFT + 80, MARGIN_TOP + borderHeight + 128);
+	levelLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 128, "Level:");
+	levelValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 80, MARGIN_TOP + borderHeight + 128);
 
-	linesLabel = new Text(renderer, arial, Color::RED, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Lines Formed:");
-	linesValue = new Text(renderer, arial, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 150);
+	linesLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Lines Formed:");
+	linesValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 150);
 
-	placedLabel = new Text(renderer, arial, Color::RED, MARGIN_LEFT, MARGIN_TOP + borderHeight + 182, "Pieces Placed:");
-	placedValue = new Text(renderer, arial, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 182);
+	placedLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 182, "Pieces Placed:");
+	placedValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 182);
+
+	gameOverText = new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 2 + 50, MARGIN_TOP + borderHeight + 300, "GAME OVER!");
+	promptUserText = new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP + borderHeight + 350,
+		"Press ESC to quit");
 
 	// make sure the renderer was created
 	if (!renderer) {
@@ -50,9 +55,7 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 	// if everything was successful set the running state
 	isRunning = true;
 
-
 	game = new Tetris();
-
 	game->LoadNextPiece();
 
 	alpha = 0;
@@ -63,11 +66,19 @@ SDLGame::~SDLGame()
 {
 	delete game;
 
-	//SDL_DestroyTexture(scoreLabel);
+	delete nextPieceLabel;
 	delete scoreLabel;
 	delete scoreValue;
+	delete levelLabel;
+	delete levelValue;
+	delete linesLabel;
+	delete linesValue;
+	delete placedLabel;
+	delete placedValue;
+	delete gameOverText;
 
-	TTF_CloseFont(arial);	
+	TTF_CloseFont(arial_24);
+	TTF_CloseFont(arial_48);
 }
 
 bool SDLGame::IsRunning() const
@@ -129,39 +140,51 @@ void SDLGame::ProcessInput()
 			if (event.window.event == SDL_WINDOWEVENT_CLOSE)
 				isRunning = false;
 			break;
-		}
+		}		
 
 		// sets the running state to false when the ESC key is pressed
-
 		case SDL_KEYDOWN: {
 
-			switch (event.key.keysym.sym)
+			if(event.key.keysym.sym == SDLK_ESCAPE)
+				isRunning = false;
+
+			// if game is running, handle the move input
+			if (!game->GameOver())
 			{
-				case SDLK_ESCAPE:
-					isRunning = false;
-				break;
+				switch (event.key.keysym.sym)
+				{				
+					case SDLK_ESCAPE:
+						isRunning = false;
+						break;
 
-				case SDLK_LEFT: case SDLK_a:
-					game->MovePieceLeft();
-				break;
+					case SDLK_LEFT: case SDLK_a:
+						game->MovePieceLeft();
+						break;
 
-				case  SDLK_RIGHT: case SDLK_d:
-					game->MovePieceRight();
-				break;
+					case  SDLK_RIGHT: case SDLK_d:
+						game->MovePieceRight();
+						break;
 
-				case SDLK_DOWN: case SDLK_s:
-					game->MovePieceDown();
-				break;
+					case SDLK_DOWN: case SDLK_s:
+						game->MovePieceDown();
+						break;
 
-				case SDLK_UP: case SDLK_w:
-					if (!keyPressed) // restrict rotation to once per key press					
-						game->RotateCurrentPiece();								
-				break;
+					case SDLK_UP: case SDLK_w:
+						if (!keyPressed) // restrict rotation to once per key press					
+							game->RotateCurrentPiece();
+						break;
 
-				case SDLK_g:
-					if (!keyPressed)
-						showGrid = !showGrid;
-				break;
+					case SDLK_g:
+						if (!keyPressed)
+							showGrid = !showGrid;
+						break;
+
+					case SDLK_SPACE:
+						if (!keyPressed)
+							//game->IncreaseLevel();
+							game->SendPieceToBottom();
+						break;
+				}
 			}
 
 			keyPressed = true;
@@ -172,9 +195,6 @@ void SDLGame::ProcessInput()
 		case SDL_KEYUP: 
 		{
 			keyPressed = false;
-
-			//if (event.key.keysym.sym == SDLK_UP)
-				//rotatePressed = false;
 		}
 
 		default: {
@@ -199,28 +219,21 @@ void SDLGame::Update()
 	deltaTime = (deltaTime > 0.05f) ? 0.05f : deltaTime;
 
 	// Sets the new ticks for the current ramt to be usind in the next pass
-	//ticksLastFrame = SDL_GetTicks();
+	ticksLastFrame = SDL_GetTicks();
+
 	if (game->FormedLines())
 	{
-		//SDL_Delay(1000); // delay a bit before clearing the lines
 		if (fadeCompleted)
 		{
 			game->ClearLinesFound();
 			fadeCompleted = false;
+			fadeIn = true;
 		}
 	}
-	else
+	else if(!game->GameOver())
 	{
 		/* Update the tetris game */
-		game->Update();
-	}
-
-	if (!game->GameRunning())
-	{
-
-		isRunning = false;
-		std::cout << "Game Over!" << std::endl;
-		std::cout << "Your score is " << game->Score() << std::endl;
+		game->Update(deltaTime);
 	}
 
 }
@@ -249,6 +262,14 @@ void SDLGame::Render()
 
 	DrawTetromino(true);
 	DrawStats();
+
+	// if game over occured
+	if (game->GameOver())
+	{
+		gameOverText->Draw();
+		promptUserText->Draw();
+	}
+
 	/* end of graphics draw */
 
 	SDL_RenderPresent(renderer); // renders the frame in on the window
@@ -385,12 +406,12 @@ void SDLGame::DrawTetromino(bool nextPiece)
 
 void SDLGame::FadeLineDisplay()
 {
-	SDL_Delay(1);
+	//SDL_Delay(1);	
 
 	if (fadeIn)
-		alpha++;
+		alpha += 15;
 	else
-		alpha--;
+		alpha -= 15;
 
 	auto lines = game->GetLines();
 
@@ -415,6 +436,7 @@ void SDLGame::FadeLineDisplay()
 		fadeCompleted = true;
 		alpha = 0;
 	}
+
 }
 
 void SDLGame::DrawStats()

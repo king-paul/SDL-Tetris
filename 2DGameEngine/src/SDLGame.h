@@ -49,9 +49,11 @@ private:
 	bool fadeIn = false;
 	bool fadeCompleted = false;
 
-	// fonts & textures
-	TTF_Font* arial;
+	// fonts
+	TTF_Font* arial_24;
+	TTF_Font* arial_48;
 
+	// text labels
 	Text* nextPieceLabel;
 	Text* scoreLabel;
 	Text* scoreValue;
@@ -61,6 +63,8 @@ private:
 	Text* linesValue;
 	Text* placedLabel;
 	Text* placedValue;
+	Text* gameOverText;
+	Text* promptUserText;
 
 	int textWidth;
 	int textHeight;
