@@ -7,6 +7,7 @@
 
 #include "Tetris.h"
 #include "Text.h"
+#include "Colors.h"
 
 const int TILE_SIZE = 32;
 const int COLS = 12;
@@ -14,26 +15,7 @@ const int ROWS = 18;
 const int GRID_OFFSET_X = 6;
 const int GRID_OFFSET_Y = 12;
 
-enum class Color
-{
-	BLACK = 0,
-	RED = 9,
-	LIME = 10,
-	BLUE = 12,
-	YELLOW = 11,
-	MAGENTA = 13,
-	CYAN = 14,
-	GRAY = 8,
-	MAROON = 1,
-	GREEN = 2,
-	NAVY = 4,
-	OLIVE = 3,
-	PURPLE = 5,
-	TEAL = 6,
-	WHITE = 15
-};
-
-class Game 
+class SDLGame 
 {
 private:
 	bool isRunning;
@@ -51,11 +33,14 @@ private:
 	// drawing options
 	bool showGrid = false;
 
+	void InitializeSDL(int width, int height);
+
 	// drawing functions
 	void DrawBoard();
 	void DrawCurrentPiece();
 
-	void SetRenderColor(Color color);
+	//void SetRenderColor(ColorName color);
+	void SetRenderColor(SDL_Color color);
 	void FadeLineDisplay();
 	void DrawStats();
 
@@ -67,16 +52,16 @@ private:
 	// fonts & textures
 	TTF_Font* arial;
 	Text* scoreLabel;
-	Text* scoreValue;	
+	Text* scoreValue;
+
 	int textWidth;
 	int textHeight;
 
 public:	
-	Game();
-	~Game();
+	SDLGame(int width, int height);
+	~SDLGame();
 	int ticksLastFrame = 0;
-	bool IsRunning() const;
-	void Initialize(int width, int height);
+	bool IsRunning() const;	
 	void ProcessInput();
 	void Update();
 	void Render();

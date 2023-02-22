@@ -1,5 +1,6 @@
 #pragma once
 #include <SDL_ttf.h>
+#include "Colors.h"
 
 class Text
 {
@@ -13,7 +14,7 @@ private:
 	int m_xPos, m_yPos;
 
 public:
-	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = {255, 255, 255}, int xPos = 0, int yPos = 0)
+	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, int xPos = 0, int yPos = 0)
 		: m_renderer(renderer), m_font(font)
 	{	
 		m_colour = colour;

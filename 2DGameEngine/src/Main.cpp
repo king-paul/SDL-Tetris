@@ -1,13 +1,11 @@
 #include <iostream>
 
 #include "Constants.h"
-#include "App.h"
+#include "SDLGame.h"
 
 int main(int argc, char* argv[]) 
 {
-    Game* app = new Game();
-
-    app->Initialize(800, 600);
+    SDLGame* app = new SDLGame(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     while (app->IsRunning())
     {

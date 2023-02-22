@@ -1,12 +1,38 @@
-#include "App.h"
+#include "SDLGame.h"
 #include "Constants.h"
 
 #include <iostream>
 #include <string>
 
-Game::Game() : window(nullptr), renderer(nullptr)
+SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 {
-	this->isRunning = true;
+	InitializeSDL(width, height);
+
+	// load fonts
+	arial = TTF_OpenFont("assets/fonts/arial.ttf", 24);
+
+	if (arial == nullptr)
+	{
+		cout << TTF_GetError() << endl;
+	}
+
+	// create text assets
+	scoreLabel = new Text(renderer, arial, Color::RED,
+		WINDOW_WIDTH / 2 + 10, GRID_OFFSET_Y);
+
+	scoreValue = new Text(renderer, arial, Color::WHITE,
+		WINDOW_WIDTH / 2 + 100, GRID_OFFSET_Y);
+
+
+	// make sure the renderer was created
+	if (!renderer) {
+		std::cerr << "Error creating SDL renderer." << std::endl;
+		return;
+	}
+
+	// if everything was successful set the running state
+	isRunning = true;
+
 
 	game = new Tetris();
 
@@ -16,7 +42,7 @@ Game::Game() : window(nullptr), renderer(nullptr)
 	fadeIn = true;	
 }
 
-Game::~Game()
+SDLGame::~SDLGame()
 {
 	delete game;
 
@@ -27,12 +53,12 @@ Game::~Game()
 	TTF_CloseFont(arial);	
 }
 
-bool Game::IsRunning() const
+bool SDLGame::IsRunning() const
 {
 	return this->isRunning;
 }
 
-void Game::Initialize(int width, int height)
+void SDLGame::InitializeSDL(int width, int height)
 {
 	// initiatlize SDL and ensure that it worked
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -62,46 +88,14 @@ void Game::Initialize(int width, int height)
 
 	// set blending mode for colour alpha channels
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
-
-	// load fonts
+	
 	int ttf = TTF_Init();
 
-	arial = TTF_OpenFont("assets/fonts/arial.ttf", 24);
-
-	if (ttf == -1 || arial == nullptr)
-	{
+	if (ttf == -1)
 		cout << TTF_GetError() << endl;
-	}
-
-	// create text assets
-	scoreLabel = new Text(renderer, arial, {255, 0, 0, 255}, 
-						  WINDOW_WIDTH / 2 + 10, GRID_OFFSET_Y);
-
-	scoreValue = new Text(renderer, arial, { 255, 255, 255, 255 },
-						  WINDOW_WIDTH / 2 + 100, GRID_OFFSET_Y);
-
-	/*
-	// create surface pointer
-	SDL_Surface* textLabel = TTF_RenderText_Blended(arial, "Score: ", { 255, 0, 0, 255 });
-
-	// create textures from text ;labels
-	scoreLabel = SDL_CreateTextureFromSurface(renderer, textLabel);
-
-	SDL_FreeSurface(textLabel);*/
-
-
-	// make sure the renderer was created
-	if (!renderer) {
-		std::cerr << "Error creating SDL renderer." << std::endl;
-		return;
-	}
-
-	// if everything was successful set the running state
-	isRunning = true;
-	return;
 }
 
-void Game::ProcessInput()
+void SDLGame::ProcessInput()
 {
 	SDL_Event event;
 	SDL_PollEvent(&event);
@@ -172,7 +166,7 @@ void Game::ProcessInput()
 	}
 }
 
-void Game::Update()
+void SDLGame::Update()
 {
 	// Sleep the execution until we reach the target frame time in millisceonds
 	int timeToWait = FRAME_TARGET_TIME - (SDL_GetTicks() - ticksLastFrame);
@@ -213,7 +207,7 @@ void Game::Update()
 
 }
 
-void Game::Render()
+void SDLGame::Render()
 {
 	SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255); // set the background colour
 	SDL_RenderClear(renderer); // clears the back render buffer
@@ -240,7 +234,7 @@ void Game::Render()
 }
 
 // deletes memory from heap created by SDL
-void Game::Destroy()
+void SDLGame::Destroy()
 {	
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -248,59 +242,12 @@ void Game::Destroy()
 	SDL_Quit(); // closes the program
 }
 
-void Game::SetRenderColor(Color color)
+void SDLGame::SetRenderColor(SDL_Color color)
 {
-	switch (color)
-	{
-		case Color::BLACK: SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-			break;
-
-		case Color::RED: SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-			break;
-
-		case Color::LIME: SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-			break;
-
-		case Color::BLUE: SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-			break;
-
-		case Color::YELLOW: SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-			break;
-
-		case Color::MAGENTA: SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
-			break;
-
-		case Color::CYAN: SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
-			break;
-
-		case Color::GRAY: SDL_SetRenderDrawColor(renderer, 128, 128, 128, 255);
-			break;
-
-		case Color::MAROON: SDL_SetRenderDrawColor(renderer, 128, 0, 0, 255);
-			break;
-
-		case Color::GREEN: SDL_SetRenderDrawColor(renderer, 0, 128, 0, 255);
-			break;
-
-		case Color::NAVY: SDL_SetRenderDrawColor(renderer, 0, 0, 128, 255);
-			break;
-
-		case Color::OLIVE: SDL_SetRenderDrawColor(renderer, 128, 128, 0, 255);
-			break;
-
-		case Color::PURPLE: SDL_SetRenderDrawColor(renderer, 128, 0, 128, 255);
-			break;
-
-		case Color::TEAL: SDL_SetRenderDrawColor(renderer, 0, 128, 128, 255);
-			break;
-
-		case Color::WHITE: SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			break;
-	}
-
+	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
 
-void Game::DrawBoard()
+void SDLGame::DrawBoard()
 {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
@@ -356,7 +303,7 @@ void Game::DrawBoard()
 
 }
 
-void Game::DrawCurrentPiece()
+void SDLGame::DrawCurrentPiece()
 {
 	Tetromino* piece = game->GetCurrentPiece();
 	int count = 0;
@@ -394,7 +341,7 @@ void Game::DrawCurrentPiece()
 	}
 }
 
-void Game::FadeLineDisplay()
+void SDLGame::FadeLineDisplay()
 {
 	SDL_Delay(1);
 
@@ -408,7 +355,7 @@ void Game::FadeLineDisplay()
 	auto lines = game->GetLines();
 
 	// iterates through all rows where there is a line and fills them with a green rectangle
-	for (int i = 0; i < lines.size(); i++)
+	for (unsigned int i = 0; i < lines.size(); i++)
 	{
 		SDL_Rect line = { GRID_OFFSET_X + TILE_SIZE, GRID_OFFSET_Y + lines[i] * TILE_SIZE,
 						  TILE_SIZE * (FIELD_WIDTH - 2), TILE_SIZE};
@@ -430,7 +377,7 @@ void Game::FadeLineDisplay()
 	}
 }
 
-void Game::DrawStats()
+void SDLGame::DrawStats()
 {
 	scoreLabel->Draw("Score: ");
 	scoreValue->Draw(std::to_string(game->Score()).c_str());
