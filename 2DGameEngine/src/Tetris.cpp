@@ -63,14 +63,23 @@ Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFiel
 							   1, 0, 0, 0,
 							   0, 0, 0, 0 });
 
+	// seed the random generator
+	time_t theTime;
+	srand((unsigned int)time(&theTime));
+
+	// initialize the first tetris piece
+	int randomPick = rand() % 7;
+	m_nextPiece = tetrominoes[randomPick];
+	m_nextPiece.type = randomPick;
+
 	LoadNextPiece(); // spawns the first tetris piece
 }
 
 void Tetris::Update()
 {
 	// check for game over by seeing if a piece at the top of the screen does not fit
-	m_gameOver = (m_currentPiece->posY == 0 &&
-		!PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY));
+	m_gameOver = (m_currentPiece.posY == 0 &&
+		!PieceFits(&m_currentPiece.tiles, m_currentPiece.posX, m_currentPiece.posY));
 
 	// Game Timing
 	SDL_Delay(50); // Game Tick
@@ -80,9 +89,9 @@ void Tetris::Update()
 	if (m_timer == m_fallTime)
 	{
 		// if the the piece fits in the space below and move it down if it does
-		if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY + 1))
+		if (PieceFits(&m_currentPiece.tiles, m_currentPiece.posX, m_currentPiece.posY + 1))
 		{
-			m_currentPiece->posY++; // It can so do it!
+			m_currentPiece.posY++; // It can so do it!
 		}
 		else // piece cannot move down any further
 		{
@@ -116,35 +125,32 @@ void Tetris::Update()
 
 void Tetris::LoadNextPiece()
 {
-	// seed the random generator
-	time_t theTime;
-	srand((unsigned int) time(&theTime));
+	m_currentPiece = m_nextPiece;
+	m_currentPiece.posX = FIELD_WIDTH / 2 - 1;
+	m_currentPiece.posY = 0;
 
 	int randomPick = rand() % 7;
 
-	m_currentPiece = &tetrominoes[randomPick];
-	m_currentPiece->type = randomPick;
-
-	m_currentPiece->posX = FIELD_WIDTH / 2 - 1;
-	m_currentPiece->posY = 0;
+	m_nextPiece = tetrominoes[randomPick];
+	m_nextPiece.type = randomPick;
 }
 
 void Tetris::MovePieceLeft()
 {
-	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX - 1, m_currentPiece->posY))
-		m_currentPiece->posX--;
+	if (PieceFits(&m_currentPiece.tiles, m_currentPiece.posX - 1, m_currentPiece.posY))
+		m_currentPiece.posX--;
 }
 
 void Tetris::MovePieceRight()
 {
-	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX + 1, m_currentPiece->posY))
-		m_currentPiece->posX++;
+	if (PieceFits(&m_currentPiece.tiles, m_currentPiece.posX + 1, m_currentPiece.posY))
+		m_currentPiece.posX++;
 }
 
 void Tetris::MovePieceDown()
 {
-	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY + 1))
-		m_currentPiece->posY++;
+	if (PieceFits(&m_currentPiece.tiles, m_currentPiece.posX, m_currentPiece.posY + 1))
+		m_currentPiece.posY++;
 }
 
 void Tetris::RotateCurrentPiece()
@@ -152,19 +158,19 @@ void Tetris::RotateCurrentPiece()
 	PieceType newRotation;
 
 	// counter clockwise	
-	for (int y = 0; y < m_currentPiece->size; y++)
+	for (int y = 0; y < m_currentPiece.size; y++)
 	{
-		for (int x = 0; x < m_currentPiece->size; x++)		
+		for (int x = 0; x < m_currentPiece.size; x++)		
 		{
-			newRotation[m_currentPiece->size - x - 1][y] = m_currentPiece->tiles[y][x];
+			newRotation[m_currentPiece.size - x - 1][y] = m_currentPiece.tiles[y][x];
 		}
 	}
 
 	// TODO: make piece rotate clockwise
 	
 
-	if (PieceFits(&newRotation, m_currentPiece->posX, m_currentPiece->posY))
-		m_currentPiece->tiles = newRotation;
+	if (PieceFits(&newRotation, m_currentPiece.posX, m_currentPiece.posY))
+		m_currentPiece.tiles = newRotation;
 }
 
 bool Tetris::PieceFits(PieceType* tetromino, int posX, int posY)
@@ -200,8 +206,8 @@ void Tetris::AddPieceToBoard()
 		for (int py = 0; py < 4; py++)
 		{
 			// if value in the index is a tile then set the matching space in the field to that tile
-			if (m_currentPiece->tiles[py][px] == true)
-				m_playField[m_currentPiece->posY + py][m_currentPiece->posX + px] = (*m_currentPiece).type + 1;
+			if (m_currentPiece.tiles[py][px] == true)
+				m_playField[m_currentPiece.posY + py][m_currentPiece.posX + px] = m_currentPiece.type + 1;
 		}
 	}
 }
@@ -213,9 +219,9 @@ void Tetris::CheckForLines()
 	// check have we got any lines
 	for (int py = 0; py < 4; py++) // iterates through the four rows the last peice occupied
 	{
-		if (m_currentPiece->posY + py < FIELD_HEIGHT - 1) // ensure y is not out of bounds
+		if (m_currentPiece.posY + py < FIELD_HEIGHT - 1) // ensure y is not out of bounds
 		{
-			int fy = m_currentPiece->posY + py;
+			int fy = m_currentPiece.posY + py;
 
 			// iterate through all positions in the row
 			for (int px = 1; px < FIELD_WIDTH - 1; px++)

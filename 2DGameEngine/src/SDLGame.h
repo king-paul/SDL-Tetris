@@ -18,11 +18,14 @@ private:
 	SDL_Renderer* renderer;	
 	Tetris* game;
 
-	// game objects
-	//SDL_Rect border = { GRID_OFFSET_X, GRID_OFFSET_Y, COLS * TILE_SIZE, ROWS * TILE_SIZE };
+	// game objects	
 	SDL_Rect tetromino[4];
-	SDL_Rect nextTetromino[4];
-	SDL_Rect nextPieceBorder;
+	SDL_Rect nextTetromino[4];	 
+
+	// panels
+	SDL_Rect field = { GRID_OFFSET_X, GRID_OFFSET_Y, COLS * TILE_SIZE, ROWS * TILE_SIZE };
+	SDL_Rect rightHandPanel{ WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT };
+	SDL_Rect nextPieceBorder;	
 
 	//keyboard pressed
 	bool keyPressed = false;
@@ -34,7 +37,7 @@ private:
 
 	// drawing functions
 	void DrawBoard();
-	void DrawCurrentPiece();
+	void DrawTetromino(bool nextPiece);
 
 	//void SetRenderColor(ColorName color);
 	void SetRenderColor(SDL_Color color);

@@ -19,27 +19,27 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 	/************************
 	 ** Create stats panel **
 	 ************************/
-	int panelLeft = WINDOW_WIDTH / 2 + 10;
+	//int panelLeft = WINDOW_WIDTH / 2 + 10;
 
 	// create next piece panel
 	int borderWith = TILE_SIZE * 5;
 	int borderHeight = TILE_SIZE * 5;
-	nextPieceBorder = { panelLeft, GRID_OFFSET_Y + 32, borderWith, borderHeight };
+	nextPieceBorder = { MARGIN_LEFT, MARGIN_TOP + 32, borderWith, borderHeight };
 
 	// create text lebels
-	nextPieceLabel = new Text(renderer, arial, Color::YELLOW, panelLeft, GRID_OFFSET_Y, "NEXT PIECE");
+	nextPieceLabel = new Text(renderer, arial, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE");
 
-	scoreLabel = new Text(renderer, arial, Color::RED, panelLeft, GRID_OFFSET_Y + borderHeight + 64, "SCORE:");
-	scoreValue = new Text(renderer, arial, Color::WHITE, panelLeft + 100, GRID_OFFSET_Y + borderHeight + 64);	
+	scoreLabel = new Text(renderer, arial, Color::RED, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE:");
+	scoreValue = new Text(renderer, arial, Color::WHITE, MARGIN_LEFT + 100, MARGIN_TOP + borderHeight + 64);	
 
-	levelLabel = new Text(renderer, arial, Color::RED, panelLeft, GRID_OFFSET_Y + borderHeight + 128, "Level:");
-	levelValue = new Text(renderer, arial, Color::WHITE, panelLeft + 80, GRID_OFFSET_Y + borderHeight + 128);
+	levelLabel = new Text(renderer, arial, Color::RED, MARGIN_LEFT, MARGIN_TOP + borderHeight + 128, "Level:");
+	levelValue = new Text(renderer, arial, Color::WHITE, MARGIN_LEFT + 80, MARGIN_TOP + borderHeight + 128);
 
-	linesLabel = new Text(renderer, arial, Color::RED, panelLeft, GRID_OFFSET_Y + borderHeight + 150, "Lines Formed:");
-	linesValue = new Text(renderer, arial, Color::WHITE, panelLeft + 180, GRID_OFFSET_Y + borderHeight + 150);
+	linesLabel = new Text(renderer, arial, Color::RED, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Lines Formed:");
+	linesValue = new Text(renderer, arial, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 150);
 
-	placedLabel = new Text(renderer, arial, Color::RED, panelLeft, GRID_OFFSET_Y + borderHeight + 182, "Pieces Placed:");
-	placedValue = new Text(renderer, arial, Color::WHITE, panelLeft + 180, GRID_OFFSET_Y + borderHeight + 182);
+	placedLabel = new Text(renderer, arial, Color::RED, MARGIN_LEFT, MARGIN_TOP + borderHeight + 182, "Pieces Placed:");
+	placedValue = new Text(renderer, arial, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 182);
 
 	// make sure the renderer was created
 	if (!renderer) {
@@ -217,6 +217,7 @@ void SDLGame::Update()
 
 	if (!game->GameRunning())
 	{
+
 		isRunning = false;
 		std::cout << "Game Over!" << std::endl;
 		std::cout << "Your score is " << game->Score() << std::endl;
@@ -226,10 +227,12 @@ void SDLGame::Update()
 
 void SDLGame::Render()
 {
-	SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255); // set the background colour
+	SetRenderColor(Color::GRAY); // sets the background colour
 	SDL_RenderClear(renderer); // clears the back render buffer
-	
-	SetRenderColor(Color::WHITE);
+
+	// color right-hand side of window a dark grey colour
+	SetRenderColor({ 21, 21, 21, 255 });
+	SDL_RenderFillRect(renderer, &rightHandPanel);
 
 	/* draw graphics on screen */
 	DrawBoard();
@@ -241,9 +244,10 @@ void SDLGame::Render()
 	}
 	else
 	{
-		DrawCurrentPiece();
+		DrawTetromino(false);
 	}
 
+	DrawTetromino(true);
 	DrawStats();
 	/* end of graphics draw */
 
@@ -266,7 +270,8 @@ void SDLGame::SetRenderColor(SDL_Color color)
 
 void SDLGame::DrawBoard()
 {
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SetRenderColor(Color::BLACK);
+	SDL_RenderFillRect(renderer, &field);
 
 	if (showGrid)
 	{
@@ -320,22 +325,32 @@ void SDLGame::DrawBoard()
 
 }
 
-void SDLGame::DrawCurrentPiece()
+void SDLGame::DrawTetromino(bool nextPiece)
 {
-	Tetromino* piece = game->GetCurrentPiece();
+	Tetromino* piece = (nextPiece) ? game->GetNextPiece() : game->GetCurrentPiece();
 	int count = 0;
 
-	// draw the current piece
-
+	// create square locations on screen for tetromino
 	for (int y = 0; y < piece->size; y++)
 	{
 		for (int x = 0; x < piece->size; x++)
 		{
 			if (piece->tiles[y][x] == true)
 			{
-				tetromino[count] = { piece->posX * TILE_SIZE + (x * TILE_SIZE) + GRID_OFFSET_X,
-									 piece->posY * TILE_SIZE + (y * TILE_SIZE) + GRID_OFFSET_Y + 1,
-									 TILE_SIZE, TILE_SIZE };
+				if (nextPiece)
+				{
+					int padding = (piece->size < 4) ? TILE_SIZE : 0;
+
+					nextTetromino[count] = { nextPieceBorder.x + (TILE_SIZE / 2) + (x * TILE_SIZE) + padding,
+											 nextPieceBorder.y + (TILE_SIZE / 2) + (y * TILE_SIZE) + padding,
+											 TILE_SIZE, TILE_SIZE };
+				}
+				else
+				{
+					tetromino[count] = { piece->posX * TILE_SIZE + (x * TILE_SIZE) + GRID_OFFSET_X,
+										 piece->posY * TILE_SIZE + (y * TILE_SIZE) + GRID_OFFSET_Y + 1,
+										 TILE_SIZE, TILE_SIZE };
+				}
 				count++;
 			}
 		}
@@ -352,9 +367,19 @@ void SDLGame::DrawCurrentPiece()
 		case 6: SetRenderColor(Color::PURPLE); break;
 	}
 
-	for (auto square : tetromino)
+	if (nextPiece)
 	{
-		SDL_RenderFillRect(renderer, &square);
+		for (SDL_Rect square : nextTetromino)
+		{
+			SDL_RenderFillRect(renderer, &square);
+		}
+	}
+	else
+	{
+		for (SDL_Rect square : tetromino)
+		{
+			SDL_RenderFillRect(renderer, &square);
+		}
 	}
 }
 
@@ -366,8 +391,6 @@ void SDLGame::FadeLineDisplay()
 		alpha++;
 	else
 		alpha--;
-
-	//std::cout << "Alpha: " << alpha << std::endl;
 
 	auto lines = game->GetLines();
 
