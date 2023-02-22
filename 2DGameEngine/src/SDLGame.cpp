@@ -171,7 +171,17 @@ void SDLGame::ProcessInput()
 
 					case SDLK_UP: case SDLK_w:
 						if (!keyPressed) // restrict rotation to once per key press					
-							game->RotateCurrentPiece();
+							game->RotateCurrentPiece(true); // clockwise rotation
+						break;
+
+					case SDLK_q:
+						if (!keyPressed) // restrict rotation to once per key press					
+							game->RotateCurrentPiece(false); // counter clockwise rotation
+						break;
+
+					case SDLK_e:
+						if (!keyPressed) // restrict rotation to once per key press					
+							game->RotateCurrentPiece(true); // clockwise rotation
 						break;
 
 					case SDLK_g:

@@ -14,38 +14,46 @@ using namespace std;
 typedef array<array <bool, 4>, 4> PieceType;
 
 struct Tetromino
-{
-	Tetromino() {}
+{	
+	Tetromino() {} // default constructor
 
-	Tetromino(int size, PieceType tiles)
+	Tetromino(int size, PieceType tiles) // paremeter constructor
 	{
 		this->size = size;
 		this->tiles = tiles;
+
+		type = 0;
 		posX = 0;
 		posY = 0;
+	}	
+	
+	Tetromino(const Tetromino& ref) // copy constructor
+	{
+		size = ref.size;
+		tiles = ref.tiles;
+		type = ref.type;
+		posX = ref.posX;
+		posY = ref.posY;
 	}
 	
 	PieceType tiles;
+	int size;
 
 	int type;
-
 	int posX;
 	int posY;
-	int size;
+	
 };
 
 class Tetris
 {
 public:
 	Tetris(int fieldWidth = 12, int fieldHeight = 18);
-	~Tetris() 
-	{ 
-
-	}
+	~Tetris();
 	
 	void Update(float deltaTime);
 	void LoadNextPiece();	
-	void RotateCurrentPiece();
+	void RotateCurrentPiece(bool clockwise);
 	void MovePieceLeft();
 	void MovePieceRight();
 	void MovePieceDown();
@@ -56,8 +64,8 @@ public:
 	// getters
 	unsigned int GetBoardValue(int x, int y){ return m_playField[y][x]; }
 	array<array<int, FIELD_WIDTH>, FIELD_HEIGHT>* GetField() { return &m_playField; }
-	Tetromino* GetCurrentPiece() { return &m_currentPiece; }
-	Tetromino* GetNextPiece() { return &m_nextPiece; }
+	Tetromino* GetCurrentPiece() { return m_currentPiece; }
+	Tetromino* GetNextPiece() { return m_nextPiece; }
 	bool FormedLines() { return !m_linesFound.empty(); }
 	vector<int> GetLines() { return m_linesFound; }
 	int Score() { return m_score; }
@@ -84,15 +92,13 @@ private:
 	void AddPieceToBoard();
 	void CheckForLines();
 
-	Tetromino m_currentPiece;
-	Tetromino m_nextPiece;
+	Tetromino* m_currentPiece;
+	Tetromino* m_nextPiece;
 
 	Tetromino tetrominoes[7];
-	//PieceType tetrominoes[7];
 
 	int nFieldWidth; // the width of the board
-	int nFieldHeight; // the height of the board
-	//Array2D<byte> m_playField; // stores the game board	
+	int nFieldHeight; // the height of the board	
 
 	array<array<int, FIELD_WIDTH>, FIELD_HEIGHT> m_playField; // stores the game board
 
