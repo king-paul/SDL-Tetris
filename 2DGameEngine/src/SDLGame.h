@@ -6,14 +6,9 @@
 #include <SDL_ttf.h>
 
 #include "Tetris.h"
+#include "Constants.h"
 #include "Text.h"
 #include "Colors.h"
-
-const int TILE_SIZE = 32;
-const int COLS = 12;
-const int ROWS = 18;
-const int GRID_OFFSET_X = 6;
-const int GRID_OFFSET_Y = 12;
 
 class SDLGame 
 {
@@ -25,7 +20,9 @@ private:
 
 	// game objects
 	//SDL_Rect border = { GRID_OFFSET_X, GRID_OFFSET_Y, COLS * TILE_SIZE, ROWS * TILE_SIZE };
-	SDL_Rect tetromino[4]; 
+	SDL_Rect tetromino[4];
+	SDL_Rect nextTetromino[4];
+	SDL_Rect nextPieceBorder;
 
 	//keyboard pressed
 	bool keyPressed = false;
@@ -51,8 +48,16 @@ private:
 
 	// fonts & textures
 	TTF_Font* arial;
+
+	Text* nextPieceLabel;
 	Text* scoreLabel;
 	Text* scoreValue;
+	Text* levelLabel;
+	Text* levelValue;
+	Text* linesLabel;
+	Text* linesValue;
+	Text* placedLabel;
+	Text* placedValue;
 
 	int textWidth;
 	int textHeight;

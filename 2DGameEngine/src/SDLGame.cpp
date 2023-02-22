@@ -16,13 +16,30 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 		cout << TTF_GetError() << endl;
 	}
 
-	// create text assets
-	scoreLabel = new Text(renderer, arial, Color::RED,
-		WINDOW_WIDTH / 2 + 10, GRID_OFFSET_Y);
+	/************************
+	 ** Create stats panel **
+	 ************************/
+	int panelLeft = WINDOW_WIDTH / 2 + 10;
 
-	scoreValue = new Text(renderer, arial, Color::WHITE,
-		WINDOW_WIDTH / 2 + 100, GRID_OFFSET_Y);
+	// create next piece panel
+	int borderWith = TILE_SIZE * 5;
+	int borderHeight = TILE_SIZE * 5;
+	nextPieceBorder = { panelLeft, GRID_OFFSET_Y + 32, borderWith, borderHeight };
 
+	// create text lebels
+	nextPieceLabel = new Text(renderer, arial, Color::YELLOW, panelLeft, GRID_OFFSET_Y, "NEXT PIECE");
+
+	scoreLabel = new Text(renderer, arial, Color::RED, panelLeft, GRID_OFFSET_Y + borderHeight + 64, "SCORE:");
+	scoreValue = new Text(renderer, arial, Color::WHITE, panelLeft + 100, GRID_OFFSET_Y + borderHeight + 64);	
+
+	levelLabel = new Text(renderer, arial, Color::RED, panelLeft, GRID_OFFSET_Y + borderHeight + 128, "Level:");
+	levelValue = new Text(renderer, arial, Color::WHITE, panelLeft + 80, GRID_OFFSET_Y + borderHeight + 128);
+
+	linesLabel = new Text(renderer, arial, Color::RED, panelLeft, GRID_OFFSET_Y + borderHeight + 150, "Lines Formed:");
+	linesValue = new Text(renderer, arial, Color::WHITE, panelLeft + 180, GRID_OFFSET_Y + borderHeight + 150);
+
+	placedLabel = new Text(renderer, arial, Color::RED, panelLeft, GRID_OFFSET_Y + borderHeight + 182, "Pieces Placed:");
+	placedValue = new Text(renderer, arial, Color::WHITE, panelLeft + 180, GRID_OFFSET_Y + borderHeight + 182);
 
 	// make sure the renderer was created
 	if (!renderer) {
@@ -379,6 +396,19 @@ void SDLGame::FadeLineDisplay()
 
 void SDLGame::DrawStats()
 {
-	scoreLabel->Draw("Score: ");
-	scoreValue->Draw(std::to_string(game->Score()).c_str());
+	// draw text labels
+	nextPieceLabel->Draw();
+	scoreLabel->Draw();
+	levelLabel->Draw();
+	linesLabel->Draw();
+	placedLabel->Draw();
+
+	// draw values next to labels
+	scoreValue->Draw(to_string(game->Score()).c_str());
+	levelValue->Draw(to_string(game->Level()).c_str());
+	linesValue->Draw(to_string(game->LinesFormed()).c_str());
+	placedValue->Draw(to_string(game->PiecesPlaced()).c_str());
+
+	SetRenderColor(Color::WHITE);
+	SDL_RenderDrawRect(renderer, &nextPieceBorder);
 }
