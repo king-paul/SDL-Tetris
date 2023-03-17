@@ -806,6 +806,9 @@
     <ClInclude Include="src\Colors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Sound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\gtx\associated_min_max.inl">
@@ -1207,6 +1210,7 @@
     <None Include="SDL2.dll" />
     <None Include="SDL2_ttf.dll" />
     <None Include="libfreetype-6.dll" />
+    <None Include="SDL2_mixer.dll" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\fonts\arial.ttf">

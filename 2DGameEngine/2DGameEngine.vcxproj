@@ -124,11 +124,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;SDL2_ttf.lib;SDL2_mixer.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>
+      </AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -411,6 +414,7 @@
     <ClInclude Include="src\Colors.h" />
     <ClInclude Include="src\Constants.h" />
     <ClInclude Include="src\SDLGame.h" />
+    <ClInclude Include="src\Sound.h" />
     <ClInclude Include="src\Tetris.h" />
     <ClInclude Include="src\Text.h" />
   </ItemGroup>
@@ -549,6 +553,7 @@
     <None Include="libs\glm\gtx\vector_query.inl" />
     <None Include="libs\glm\gtx\wrap.inl" />
     <None Include="SDL2.dll" />
+    <None Include="SDL2_mixer.dll" />
     <None Include="SDL2_ttf.dll" />
   </ItemGroup>
   <ItemGroup>
