@@ -52,6 +52,11 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 		return;
 	}
 
+	music = new Music("assets/sounds/Music.mp3");
+	music->Play();
+
+	rotateSound = new SoundEffect("assets/sounds/rotate_piece.wav");
+
 	// if everything was successful set the running state
 	isRunning = true;
 
@@ -77,6 +82,8 @@ SDLGame::~SDLGame()
 	delete placedValue;
 	delete gameOverText;
 
+	//delete music;
+
 	TTF_CloseFont(arial_24);
 	TTF_CloseFont(arial_48);
 }
@@ -93,7 +100,7 @@ void SDLGame::InitializeSDL(int width, int height)
 	{
 		std::cerr << "Error Initializing SDL." << std::endl;
 		return;
-	}
+	}	
 
 	// create a new window
 	window = SDL_CreateWindow(
@@ -121,6 +128,17 @@ void SDLGame::InitializeSDL(int width, int height)
 
 	if (ttf == -1)
 		cout << TTF_GetError() << endl;
+
+	// initialize audio
+	Mix_Init(0);// != 0) // parameter 0 = wave files
+	{
+		std::cout << "Mixer initialized successfully";
+	}
+
+	Mix_Init(MIX_INIT_MP3);
+
+	// open and play audio
+	Mix_OpenAudio(AUDIO_FREQUENCY, MIX_DEFAULT_FORMAT, AUDIO_CHANNELS, AUDIO_CHUNK_SIZE);
 }
 
 void SDLGame::ProcessInput()
@@ -172,16 +190,19 @@ void SDLGame::ProcessInput()
 					case SDLK_UP: case SDLK_w:
 						if (!keyPressed) // restrict rotation to once per key press					
 							game->RotateCurrentPiece(true); // clockwise rotation
+							rotateSound->Play(); // play sound effect
 						break;
 
 					case SDLK_q:
 						if (!keyPressed) // restrict rotation to once per key press					
 							game->RotateCurrentPiece(false); // counter clockwise rotation
+							rotateSound->Play();
 						break;
 
 					case SDLK_e:
 						if (!keyPressed) // restrict rotation to once per key press					
 							game->RotateCurrentPiece(true); // clockwise rotation
+							rotateSound->Play();
 						break;
 
 					case SDLK_g:
@@ -288,6 +309,8 @@ void SDLGame::Render()
 // deletes memory from heap created by SDL
 void SDLGame::Destroy()
 {	
+	Mix_CloseAudio();
+
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 

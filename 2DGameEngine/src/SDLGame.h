@@ -4,11 +4,13 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
 #include "Tetris.h"
 #include "Constants.h"
 #include "Text.h"
 #include "Colors.h"
+#include "Sound.h"
 
 class SDLGame 
 {
@@ -65,6 +67,10 @@ private:
 	Text* placedValue;
 	Text* gameOverText;
 	Text* promptUserText;
+
+	//Sounds
+	Sound* music;
+	Sound* rotateSound;
 
 	int textWidth;
 	int textHeight;
