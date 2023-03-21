@@ -6,6 +6,7 @@
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 
+#include "MainMenu.h"
 #include "Tetris.h"
 #include "Constants.h"
 #include "Text.h"
@@ -14,10 +15,30 @@
 
 class SDLGame 
 {
+public:
+	SDLGame(int width, int height);
+	~SDLGame();
+	int ticksLastFrame = 0;
+	bool IsRunning() const;
+	void ProcessInput();
+	void Update();
+	void Render();
+	void Destroy();
+
+	enum GameState
+	{
+		MAIN_MENU,
+		RUNNING,
+		PAUSED,
+		GAME_OVER,
+		QUIT
+	};
+
 private:
-	bool isRunning;
+	GameState gameState;
 	SDL_Window* window;
 	SDL_Renderer* renderer;	
+	MainMenu* mainMenu;
 	Tetris* game;
 
 	// game objects	
@@ -74,16 +95,6 @@ private:
 
 	int textWidth;
 	int textHeight;
-
-public:	
-	SDLGame(int width, int height);
-	~SDLGame();
-	int ticksLastFrame = 0;
-	bool IsRunning() const;	
-	void ProcessInput();
-	void Update();
-	void Render();
-	void Destroy();
 };
 
 #endif

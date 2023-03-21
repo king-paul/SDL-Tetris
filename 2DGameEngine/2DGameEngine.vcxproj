@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\MainMenu.cpp" />
     <ClCompile Include="src\SDLGame.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Tetris.cpp" />
@@ -411,8 +412,10 @@
     <ClInclude Include="libs\lua\luaconf.h" />
     <ClInclude Include="libs\lua\lualib.h" />
     <ClInclude Include="libs\sol\sol.hpp" />
+    <ClInclude Include="src\Button.h" />
     <ClInclude Include="src\Colors.h" />
     <ClInclude Include="src\Constants.h" />
+    <ClInclude Include="src\MainMenu.h" />
     <ClInclude Include="src\SDLGame.h" />
     <ClInclude Include="src\Sound.h" />
     <ClInclude Include="src\Tetris.h" />

@@ -17,6 +17,11 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 		cout << TTF_GetError() << endl;
 	}
 
+	// Start the main menu
+
+	gameState = MAIN_MENU;
+	mainMenu = new MainMenu(renderer, window);
+
 	/************************
 	 ** Create stats panel **
 	 ************************/
@@ -53,15 +58,16 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 	}
 
 	music = new Music("assets/sounds/Music.mp3");
-	music->Play();
+	
 
 	rotateSound = new SoundEffect("assets/sounds/rotate_piece.wav");
 
 	// if everything was successful set the running state
-	isRunning = true;
+	//gameState =	RUNNING;
 
-	game = new Tetris();
-	game->LoadNextPiece();
+	//music->Play();
+	//game = new Tetris();
+	//game->LoadNextPiece();
 
 	alpha = 0;
 	fadeIn = true;	
@@ -69,7 +75,10 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 
 SDLGame::~SDLGame()
 {
-	delete game;
+	if (game != nullptr)
+	{
+		delete game;
+	}
 
 	delete nextPieceLabel;
 	delete scoreLabel;
@@ -81,6 +90,8 @@ SDLGame::~SDLGame()
 	delete placedLabel;
 	delete placedValue;
 	delete gameOverText;
+	
+	delete mainMenu;
 
 	//delete music;
 
@@ -90,7 +101,7 @@ SDLGame::~SDLGame()
 
 bool SDLGame::IsRunning() const
 {
-	return this->isRunning;
+	return gameState != QUIT;
 }
 
 void SDLGame::InitializeSDL(int width, int height)
@@ -131,9 +142,9 @@ void SDLGame::InitializeSDL(int width, int height)
 
 	// initialize audio
 	Mix_Init(0);// != 0) // parameter 0 = wave files
-	{
-		std::cout << "Mixer initialized successfully";
-	}
+	//{
+	//	std::cout << "Mixer initialized successfully";
+	//}
 
 	Mix_Init(MIX_INIT_MP3);
 
@@ -149,22 +160,27 @@ void SDLGame::ProcessInput()
 	switch (event.type)
 	{
 		case SDL_QUIT: {
-			isRunning = false;
+			gameState = QUIT;
 			break;
 		}
 
 		case SDL_WINDOWEVENT:
 		{
 			if (event.window.event == SDL_WINDOWEVENT_CLOSE)
-				isRunning = false;
+				gameState = QUIT;
 			break;
 		}		
-
-		// sets the running state to false when the ESC key is pressed
+				
 		case SDL_KEYDOWN: {
 
-			if(event.key.keysym.sym == SDLK_ESCAPE)
-				isRunning = false;
+			// pause/unpause the game if ESC is pressed
+			if (event.key.keysym.sym == SDLK_ESCAPE)
+			{
+				if (gameState == RUNNING)
+					gameState = PAUSED;
+				else if (gameState == PAUSED)
+					gameState = RUNNING;
+			}
 
 			// if game is running, handle the move input
 			if (!game->GameOver())
@@ -172,8 +188,8 @@ void SDLGame::ProcessInput()
 				switch (event.key.keysym.sym)
 				{				
 					case SDLK_ESCAPE:
-						isRunning = false;
-						break;
+						gameState = MAIN_MENU;
+						break;	
 
 					case SDLK_LEFT: case SDLK_a:
 						game->MovePieceLeft();
@@ -252,19 +268,25 @@ void SDLGame::Update()
 	// Sets the new ticks for the current ramt to be usind in the next pass
 	ticksLastFrame = SDL_GetTicks();
 
-	if (game->FormedLines())
+	if (gameState == MAIN_MENU)
+		mainMenu->Update();
+
+	if (gameState == RUNNING)
 	{
-		if (fadeCompleted)
+		if (game->FormedLines())
 		{
-			game->ClearLinesFound();
-			fadeCompleted = false;
-			fadeIn = true;
+			if (fadeCompleted)
+			{
+				game->ClearLinesFound();
+				fadeCompleted = false;
+				fadeIn = true;
+			}
 		}
-	}
-	else if(!game->GameOver())
-	{
-		/* Update the tetris game */
-		game->Update(deltaTime);
+		else if (!game->GameOver())
+		{
+			/* Update the tetris game */
+			game->Update(deltaTime);
+		}
 	}
 
 }
@@ -274,31 +296,38 @@ void SDLGame::Render()
 	SetRenderColor(Color::GRAY); // sets the background colour
 	SDL_RenderClear(renderer); // clears the back render buffer
 
-	// color right-hand side of window a dark grey colour
-	SetRenderColor({ 21, 21, 21, 255 });
-	SDL_RenderFillRect(renderer, &rightHandPanel);
-
 	/* draw graphics on screen */
-	DrawBoard();
-
-	if (game->FormedLines())
+	if (gameState == MAIN_MENU)
 	{
-		if(!fadeCompleted)
-			FadeLineDisplay();
+		mainMenu->Draw();
 	}
-	else
+	else // on the game screen
 	{
-		DrawTetromino(false);
-	}
+		// color right-hand side of window a dark grey colour
+		SetRenderColor({ 21, 21, 21, 255 });
+		SDL_RenderFillRect(renderer, &rightHandPanel);
 
-	DrawTetromino(true);
-	DrawStats();
+		DrawBoard();
 
-	// if game over occured
-	if (game->GameOver())
-	{
-		gameOverText->Draw();
-		promptUserText->Draw();
+		if (game->FormedLines())
+		{
+			if (!fadeCompleted)
+				FadeLineDisplay();
+		}
+		else
+		{
+			DrawTetromino(false);
+		}
+
+		DrawTetromino(true);
+		DrawStats();
+
+		// if game over occured
+		if (game->GameOver())
+		{
+			gameOverText->Draw();
+			promptUserText->Draw();
+		}
 	}
 
 	/* end of graphics draw */

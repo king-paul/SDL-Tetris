@@ -43,6 +43,11 @@ public:
 		SDL_FreeSurface(m_textLabel);
 	}
 
+	void SetStyle(int style)
+	{
+		TTF_SetFontStyle(m_font, style);
+	}
+
 	void Draw()
 	{
 		SDL_RenderCopy(m_renderer, m_texture, NULL, &m_textBox);
