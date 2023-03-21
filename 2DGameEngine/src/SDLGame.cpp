@@ -1,4 +1,5 @@
 #include "SDLGame.h"
+#include "MainMenu.h"
 #include "Constants.h"
 
 #include <iostream>
@@ -20,54 +21,7 @@ SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
 	// Start the main menu
 
 	gameState = MAIN_MENU;
-	mainMenu = new MainMenu(renderer, window);
-
-	/************************
-	 ** Create stats panel **
-	 ************************/
-	//int panelLeft = WINDOW_WIDTH / 2 + 10;
-
-	// create next piece panel
-	int borderWith = TILE_SIZE * 5;
-	int borderHeight = TILE_SIZE * 5;
-	nextPieceBorder = { MARGIN_LEFT, MARGIN_TOP + 32, borderWith, borderHeight };
-
-	// create text lebels
-	nextPieceLabel = new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE");
-
-	scoreLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE:");
-	scoreValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 100, MARGIN_TOP + borderHeight + 64);	
-
-	levelLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 128, "Level:");
-	levelValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 80, MARGIN_TOP + borderHeight + 128);
-
-	linesLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Lines Formed:");
-	linesValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 150);
-
-	placedLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 182, "Pieces Placed:");
-	placedValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 182);
-
-	gameOverText = new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 2 + 50, MARGIN_TOP + borderHeight + 300, "GAME OVER!");
-	promptUserText = new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP + borderHeight + 350,
-		"Press ESC to quit");
-
-	// make sure the renderer was created
-	if (!renderer) {
-		std::cerr << "Error creating SDL renderer." << std::endl;
-		return;
-	}
-
-	music = new Music("assets/sounds/Music.mp3");
-	
-
-	rotateSound = new SoundEffect("assets/sounds/rotate_piece.wav");
-
-	// if everything was successful set the running state
-	//gameState =	RUNNING;
-
-	//music->Play();
-	//game = new Tetris();
-	//game->LoadNextPiece();
+	mainMenu = new MainMenu(this);
 
 	alpha = 0;
 	fadeIn = true;	
@@ -97,6 +51,53 @@ SDLGame::~SDLGame()
 
 	TTF_CloseFont(arial_24);
 	TTF_CloseFont(arial_48);
+}
+
+void SDLGame::StartGame()
+{
+	/** Create stats panel **/
+
+	//int panelLeft = WINDOW_WIDTH / 2 + 10;
+
+	// create next piece panel
+	int borderWith = TILE_SIZE * 5;
+	int borderHeight = TILE_SIZE * 5;
+	nextPieceBorder = { MARGIN_LEFT, MARGIN_TOP + 32, borderWith, borderHeight };
+
+	// create text lebels
+	nextPieceLabel = new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE");
+
+	scoreLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE:");
+	scoreValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 100, MARGIN_TOP + borderHeight + 64);
+
+	levelLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 128, "Level:");
+	levelValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 80, MARGIN_TOP + borderHeight + 128);
+
+	linesLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Lines Formed:");
+	linesValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 150);
+
+	placedLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 182, "Pieces Placed:");
+	placedValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 182);
+
+	gameOverText = new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 2 + 50, MARGIN_TOP + borderHeight + 300, "GAME OVER!");
+	promptUserText = new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP + borderHeight + 350, "Press ESC to quit");
+
+	// make sure the renderer was created
+	if (!renderer) {
+		std::cerr << "Error creating SDL renderer." << std::endl;
+		return;
+	}
+
+	// Load sound and music
+	music = new Music("assets/sounds/Music.mp3");
+	rotateSound = new SoundEffect("assets/sounds/rotate_piece.wav");
+
+	// if everything was successful set the running state
+	gameState = RUNNING;
+
+	music->Play();
+	game = new Tetris();
+	game->LoadNextPiece();
 }
 
 bool SDLGame::IsRunning() const
@@ -242,6 +243,27 @@ void SDLGame::ProcessInput()
 		case SDL_KEYUP: 
 		{
 			keyPressed = false;
+			break;
+		}
+
+		case SDL_MOUSEBUTTONDOWN:
+		{
+			if (event.button.button == SDL_BUTTON_LEFT)
+			{
+				//std::cout << "Mouse Pressed" << std::endl;
+				leftMouseDown = true;
+			}
+			break;
+		}
+
+		case SDL_MOUSEBUTTONUP:
+		{
+			if (event.button.button == SDL_BUTTON_LEFT)
+			{
+				//std::cout << "Mouse Released" << std::endl;
+				leftMouseDown = false;
+			}
+			break;
 		}
 
 		default: {
@@ -301,7 +323,7 @@ void SDLGame::Render()
 	{
 		mainMenu->Draw();
 	}
-	else // on the game screen
+	else if(gameState != QUIT) // on the game screen
 	{
 		// color right-hand side of window a dark grey colour
 		SetRenderColor({ 21, 21, 21, 255 });

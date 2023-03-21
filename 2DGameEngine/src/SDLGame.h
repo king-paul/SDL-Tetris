@@ -6,12 +6,22 @@
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
 
-#include "MainMenu.h"
 #include "Tetris.h"
 #include "Constants.h"
 #include "Text.h"
 #include "Colors.h"
 #include "Sound.h"
+
+class MainMenu;
+
+enum GameState
+{
+	MAIN_MENU,
+	RUNNING,
+	PAUSED,
+	GAME_OVER,
+	QUIT
+};
 
 class SDLGame 
 {
@@ -20,19 +30,21 @@ public:
 	~SDLGame();
 	int ticksLastFrame = 0;
 	bool IsRunning() const;
+
 	void ProcessInput();
 	void Update();
 	void Render();
 	void Destroy();
 
-	enum GameState
-	{
-		MAIN_MENU,
-		RUNNING,
-		PAUSED,
-		GAME_OVER,
-		QUIT
-	};
+	void StartGame();
+
+	// getters
+	SDL_Window* GetWindow() { return window; }
+	SDL_Renderer* GetRenderer() { return renderer; }
+	bool MousePressed() { return leftMouseDown; }
+
+	// setters
+	void SetState(GameState state) { gameState = state; }
 
 private:
 	GameState gameState;
@@ -50,8 +62,9 @@ private:
 	SDL_Rect rightHandPanel{ WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT };
 	SDL_Rect nextPieceBorder;	
 
-	//keyboard pressed
+	// input variables
 	bool keyPressed = false;
+	bool leftMouseDown = false;
 
 	// drawing options
 	bool showGrid = false;

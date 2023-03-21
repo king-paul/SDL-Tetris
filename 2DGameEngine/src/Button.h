@@ -7,11 +7,14 @@
 #include "Colors.h"
 #include "text.h"
 
+#include "SDLGame.h"
+
 class Button
 {
 public:
-	Button(SDL_Renderer* renderer, SDL_Window* window, TTF_Font* font, int width, int height, int posX, int posY, const char* text,
-		SDL_Color backgroundColor = Color::SILVER, SDL_Color textColour = Color::BLACK) : m_renderer(renderer), m_window(window)
+	Button(SDLGame* app, TTF_Font* font, int width, int height, int posX, int posY, const char* text,
+		SDL_Color backgroundColor = Color::SILVER, SDL_Color textColour = Color::BLACK) 
+		: m_renderer(app->GetRenderer()), m_window(app->GetWindow()), app(app)
 	{
 		// set background properties
 		m_background.w = width;
@@ -21,7 +24,7 @@ public:
 
 		m_colorNormal = backgroundColor;
 
-		m_text = new Text(renderer, font, textColour, posX + width/4, posY + height/4, text);
+		m_text = new Text(m_renderer, font, textColour, posX + width/4, posY + height/4, text);
 		m_text->SetStyle(TTF_STYLE_BOLD);
 	}
 
@@ -39,8 +42,6 @@ public:
 
 	void Draw()
 	{
-		//CheckMousePress();
-
 		if (Pressed())
 			SetRenderColor(m_colourPressed);
 		else if (Rollover())
@@ -50,13 +51,6 @@ public:
 		SDL_RenderFillRect(m_renderer, &m_background); // draws the background
 
 		m_text->Draw(); // renders the text
-
-		//CheckMousePress();
-	}
-
-	void Update(bool mousePressed)
-	{
-
 	}
 
 	bool Rollover()
@@ -84,62 +78,25 @@ public:
 	}
 
 	bool Pressed()
-	{
-		if (Rollover())
-		{
-			SDL_Event event;
-			SDL_PollEvent(&event);
-
-			// checks if left mouse button is down
-			if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
-			{				
-				return true;
-			}
-		}
-
-		return false;
+	{		
+		mousePressed = app->MousePressed();
+		return Rollover() && mousePressed;
 	}
 
 	bool Clicked()
-	{
-		if (Rollover())// && mousePressed)
+	{		
+		if (mousePressed && Rollover() && !app->MousePressed())
 		{
-			SDL_Event event;
-			SDL_PollEvent(&event);
-
-			if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
-			{				
-				mousePressed = false;
-				return true;
-			}
+			mousePressed = false;
+			return true;
 		}
 
 		return false;
 	}
 
-	// updates the mousepressed variable
-	void CheckMousePress()
-	{
-		SDL_Event event;
-		SDL_PollEvent(&event);
-
-		if (mousePressed)
-		{
-			if (event.type == SDL_MOUSEBUTTONUP && event.button.button == SDL_BUTTON_LEFT)
-			{
-				mousePressed = false;
-			}
-		}
-		else
-		{
-			if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT)
-			{
-				mousePressed = true;
-			}
-		}
-	}
-
 private:
+
+	SDLGame* app;
 	SDL_Window* m_window;
 	SDL_Renderer* m_renderer;
 

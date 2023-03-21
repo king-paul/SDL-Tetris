@@ -1,15 +1,18 @@
+#include "SDLGame.h"
 #include "MainMenu.h"
 
-MainMenu::MainMenu(SDL_Renderer* renderer, SDL_Window* window) : m_renderer(renderer), m_window(window)
+MainMenu::MainMenu(SDLGame* app) : app(app)
 {
 	buttonFont = TTF_OpenFont("assets/fonts/arial.ttf", 14);
 
 	// create buttons
-	playButton = new Button(renderer, window, buttonFont, 150, 32, 320, 240, "Play Game");
+	playButton = new Button(app, buttonFont, 150, 32, 320, 240, "Play Game");
 	playButton->SetColours(Color::LIME, Color::YELLOW, Color::GREEN);
 
-	quitButton = new Button(renderer, window, buttonFont, 150, 32, 320, 300, "Quit");
+	quitButton = new Button(app, buttonFont, 150, 32, 320, 300, "Quit");
 	quitButton->SetColours(Color::RED, Color::YELLOW, Color::MAROON);
+
+
 }
 
 MainMenu::~MainMenu()
@@ -24,12 +27,12 @@ void MainMenu::Update()
 {
 	if (playButton->Clicked())
 	{
-		std::cout << "You clicked the Play Game button" << std::endl;
+		app->StartGame();
 	}
 
 	if (quitButton->Clicked())
-	{
-		std::cout << "You clicked the Quit button" << std::endl;
+	{		
+		app->SetState(GameState::QUIT);
 	}
 }
 
