@@ -17,7 +17,9 @@ private:
 	SDLGame* app;
 
 	TTF_Font* buttonFont = nullptr;
-	TTF_Font* arial_72 = nullptr;
+	TTF_Font* titleFont = nullptr;
+
+	Text* title;
 
 	Button* playButton = nullptr;	
 	Button* quitButton = nullptr;
