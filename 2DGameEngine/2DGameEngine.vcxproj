@@ -418,11 +418,13 @@
     <ClInclude Include="src\MainMenu.h" />
     <ClInclude Include="src\SDLGame.h" />
     <ClInclude Include="src\Sound.h" />
+    <ClInclude Include="src\Sprite.h" />
     <ClInclude Include="src\Tetris.h" />
     <ClInclude Include="src\Text.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libfreetype-6.dll" />
+    <None Include="libpng16-16.dll" />
     <None Include="libs\glm\detail\func_common.inl" />
     <None Include="libs\glm\detail\func_common_simd.inl" />
     <None Include="libs\glm\detail\func_exponential.inl" />
@@ -556,6 +558,7 @@
     <None Include="libs\glm\gtx\vector_query.inl" />
     <None Include="libs\glm\gtx\wrap.inl" />
     <None Include="SDL2.dll" />
+    <None Include="SDL2_image.dll" />
     <None Include="SDL2_mixer.dll" />
     <None Include="SDL2_ttf.dll" />
   </ItemGroup>

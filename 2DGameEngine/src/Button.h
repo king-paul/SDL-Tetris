@@ -13,8 +13,8 @@ class Button
 {
 public:
 	Button(SDLGame* app, TTF_Font* font, int width, int height, int posX, int posY, const char* text,
-		SDL_Color backgroundColor = Color::SILVER, SDL_Color textColour = Color::BLACK) 
-		: m_renderer(app->GetRenderer()), m_window(app->GetWindow()), app(app)
+		   SDL_Color backgroundColor = Color::SILVER, SDL_Color textColour = Color::BLACK) 
+		 : m_renderer(app->GetRenderer()), m_window(app->GetWindow()), app(app)
 	{
 		// set background properties
 		m_background.w = width;

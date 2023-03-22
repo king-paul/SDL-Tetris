@@ -1,6 +1,7 @@
 #pragma once
 #include "Text.h"
 #include "Button.h"
+#include "Sprite.h"
 
 class SDLGame;
 

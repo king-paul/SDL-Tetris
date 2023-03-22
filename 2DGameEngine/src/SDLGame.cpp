@@ -34,6 +34,7 @@ SDLGame::~SDLGame()
 		delete game;
 	}
 
+	// free text from heap
 	delete nextPieceLabel;
 	delete scoreLabel;
 	delete scoreValue;
@@ -44,6 +45,15 @@ SDLGame::~SDLGame()
 	delete placedLabel;
 	delete placedValue;
 	delete gameOverText;
+
+	// free sprites from heap
+	delete blockBlue;
+	delete blockCyan;
+	delete blockGreen;
+	delete blockOrange;
+	delete blockPurple;
+	delete blockRed;
+	delete blockYellow;
 	
 	delete mainMenu;
 
@@ -87,6 +97,15 @@ void SDLGame::StartGame()
 		std::cerr << "Error creating SDL renderer." << std::endl;
 		return;
 	}
+
+	// Load block tile sprites
+	blockBlue = new Sprite("assets/images/blue.png", renderer);
+	blockCyan = new Sprite("assets/images/cyan.png", renderer);
+	blockGreen = new Sprite("assets/images/green.png", renderer);
+	blockOrange = new Sprite("assets/images/orange.png", renderer);
+	blockPurple = new Sprite("assets/images/purple.png", renderer);
+	blockRed = new Sprite("assets/images/red.png", renderer);
+	blockYellow = new Sprite("assets/images/yellow.png", renderer);
 
 	// Load sound and music
 	music = new Music("assets/sounds/Music.mp3");
@@ -399,6 +418,8 @@ void SDLGame::DrawBoard()
 
 	auto gameField = game->GetField();
 
+	Sprite* blockToDraw = nullptr;
+
 	// draw coloured squares
 	for (int y = 0; y < ROWS; y++)
 	{
@@ -411,19 +432,26 @@ void SDLGame::DrawBoard()
 				switch (boardValue)
 				{
 					case 0:	break;
-					case 1: SetRenderColor(Color::RED); break;
-					case 2: SetRenderColor(Color::GREEN); break;
-					case 3: SetRenderColor(Color::BLUE); break;
-					case 4: SetRenderColor(Color::YELLOW); break;
-					case 5: SetRenderColor(Color::MAGENTA); break;
-					case 6: SetRenderColor(Color::CYAN); break;
-					case 7: SetRenderColor(Color::PURPLE); break;
+					case 1: blockToDraw = blockCyan; break;
+					case 2: blockToDraw = blockPurple; break;
+					case 3: blockToDraw = blockYellow; break;
+					case 4: blockToDraw = blockBlue; break;
+					case 5: blockToDraw = blockOrange; break;
+					case 6: blockToDraw = blockGreen; break;
+					case 7: blockToDraw = blockRed; break;
 					case 8: SetRenderColor(Color::BLACK); break;
 					case 9: SetRenderColor(Color::GRAY); break;
 				}
 
-				SDL_Rect square = { GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
-				SDL_RenderFillRect(renderer, &square);
+				if (boardValue == 8 || boardValue == 9)
+				{
+					SDL_Rect square = { GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
+					SDL_RenderFillRect(renderer, &square);
+				}
+				else
+				{
+					blockToDraw->Draw(GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE);
+				}
 			}
 		}
 	}
@@ -461,37 +489,37 @@ void SDLGame::DrawTetromino(bool nextPiece)
 		}
 	}
 
+	Sprite* blockToDraw = nullptr;
+
 	switch (piece->type)
 	{
-		case 0: SetRenderColor(Color::RED); break;
-		case 1: SetRenderColor(Color::GREEN); break;
-		case 2: SetRenderColor(Color::BLUE); break;
-		case 3: SetRenderColor(Color::YELLOW); break;
-		case 4: SetRenderColor(Color::MAGENTA); break;
-		case 5: SetRenderColor(Color::CYAN); break;
-		case 6: SetRenderColor(Color::PURPLE); break;
+		case 0: blockToDraw = blockCyan; break;
+		case 1: blockToDraw = blockPurple; break;
+		case 2: blockToDraw = blockYellow; break;
+		case 3: blockToDraw = blockBlue; break;
+		case 4: blockToDraw = blockOrange; break;
+		case 5: blockToDraw = blockGreen; break;
+		case 6: blockToDraw = blockRed; break;
 	}
 
 	if (nextPiece)
 	{
 		for (SDL_Rect square : nextTetromino)
 		{
-			SDL_RenderFillRect(renderer, &square);
+			blockToDraw->Draw(square.x, square.y);
 		}
 	}
 	else
 	{
 		for (SDL_Rect square : tetromino)
-		{
-			SDL_RenderFillRect(renderer, &square);
+		{			
+			blockToDraw->Draw(square.x, square.y);
 		}
 	}
 }
 
 void SDLGame::FadeLineDisplay()
 {
-	//SDL_Delay(1);	
-
 	if (fadeIn)
 		alpha += 15;
 	else

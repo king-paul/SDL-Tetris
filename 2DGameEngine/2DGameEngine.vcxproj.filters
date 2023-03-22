@@ -818,6 +818,9 @@
     <ClInclude Include="src\MainMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Sprite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\gtx\associated_min_max.inl">
@@ -1220,6 +1223,8 @@
     <None Include="SDL2_ttf.dll" />
     <None Include="libfreetype-6.dll" />
     <None Include="SDL2_mixer.dll" />
+    <None Include="SDL2_image.dll" />
+    <None Include="libpng16-16.dll" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="assets\fonts\arial.ttf">

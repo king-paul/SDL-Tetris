@@ -22,7 +22,7 @@ Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFiel
 
 	// Create the tetrominoes
 	tetrominoes[0] = Tetromino(4,
-							  { 0, 1, 0, 0,
+							  {0, 1, 0, 0,
 							   0, 1, 0, 0,
 							   0, 1, 0, 0,
 							   0, 1, 0, 0 }
