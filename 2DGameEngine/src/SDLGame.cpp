@@ -334,9 +334,6 @@ void SDLGame::Update()
 
 void SDLGame::Render()
 {
-	SetRenderColor(Color::GRAY); // sets the background colour
-	SDL_RenderClear(renderer); // clears the back render buffer
-
 	/* draw graphics on screen */
 	if (gameState == MAIN_MENU)
 	{
@@ -344,6 +341,9 @@ void SDLGame::Render()
 	}
 	else if(gameState != QUIT) // on the game screen
 	{
+		SetRenderColor(Color::GRAY); // sets the background colour
+		SDL_RenderClear(renderer); // clears the back render buffer
+
 		// color right-hand side of window a dark grey colour
 		SetRenderColor({ 21, 21, 21, 255 });
 		SDL_RenderFillRect(renderer, &rightHandPanel);
@@ -443,15 +443,13 @@ void SDLGame::DrawBoard()
 					case 9: SetRenderColor(Color::GRAY); break;
 				}
 
-				if (boardValue == 8 || boardValue == 9)
-				{
-					SDL_Rect square = { GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
-					SDL_RenderFillRect(renderer, &square);
-				}
-				else
-				{
-					blockToDraw->Draw(GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE);
-				}
+				SDL_Rect square = { GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
+
+				if (boardValue == 8 || boardValue == 9)		
+					SDL_RenderFillRect(renderer, &square);				
+				else				
+					blockToDraw->Draw(&square);
+				
 			}
 		}
 	}
@@ -506,14 +504,14 @@ void SDLGame::DrawTetromino(bool nextPiece)
 	{
 		for (SDL_Rect square : nextTetromino)
 		{
-			blockToDraw->Draw(square.x, square.y);
+			blockToDraw->Draw(&square);
 		}
 	}
 	else
 	{
 		for (SDL_Rect square : tetromino)
 		{			
-			blockToDraw->Draw(square.x, square.y);
+			blockToDraw->Draw(&square);
 		}
 	}
 }

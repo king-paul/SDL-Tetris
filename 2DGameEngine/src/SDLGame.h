@@ -46,6 +46,8 @@ public:
 
 	// setters
 	void SetState(GameState state) { gameState = state; }
+	//void SetRenderColor(ColorName color);
+	void SetRenderColor(SDL_Color color);
 
 private:
 	GameState gameState;
@@ -84,9 +86,7 @@ private:
 	// drawing functions
 	void DrawBoard();
 	void DrawTetromino(bool nextPiece);
-
-	//void SetRenderColor(ColorName color);
-	void SetRenderColor(SDL_Color color);
+	
 	void FadeLineDisplay();
 	void DrawStats();
 

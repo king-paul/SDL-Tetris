@@ -29,10 +29,20 @@ public:
 		
 	}
 
+	void Draw(SDL_Rect *destination)
+	{
+		SDL_RenderCopy(m_renderer, texture, &sourceRect, destination);
+	}
+
 	void Draw(int x, int y)
 	{
-		SDL_Rect destinationRect = { x, y, TILE_SIZE , TILE_SIZE };
+		SDL_Rect destinationRect = { x, y, sourceRect.w , sourceRect.h };
+		SDL_RenderCopy(m_renderer, texture, &sourceRect, &destinationRect);
+	}
 
+	void Draw(int x, int y, int width, int height)
+	{
+		SDL_Rect destinationRect = { x, y, width , height };
 		SDL_RenderCopy(m_renderer, texture, &sourceRect, &destinationRect);
 	}
 

@@ -12,12 +12,13 @@ private:
 	SDL_Texture* m_texture;
 
 	int m_xPos, m_yPos;
+	int m_style;
 	const char* m_text;
 
 	SDL_Rect m_textBox;
 
 public:
-	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, int xPos = 0, int yPos = 0, const char* text = "")
+	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, const char* text = "", int xPos = 0, int yPos = 0)
 		: m_renderer(renderer), m_font(font)
 	{	
 		m_colour = colour;
@@ -29,8 +30,30 @@ public:
 
 		/* initialize text component */
 		
-		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour); // creates surface		
+		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour); // creates surface
 		m_texture = SDL_CreateTextureFromSurface(m_renderer, m_textLabel); 
+
+		// set position and scale of the texture
+		int textWidth, textHeight;
+		TTF_SizeText(m_font, text, &textWidth, &textHeight);
+		m_textBox = { m_xPos, m_yPos, textWidth, textHeight };
+	}
+
+	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, int xPos = 0, int yPos = 0, const char* text = "")
+		: m_renderer(renderer), m_font(font)
+	{
+		m_colour = colour;
+		m_textLabel = nullptr;
+		m_texture = nullptr;
+		m_xPos = xPos;
+		m_yPos = yPos;
+		m_text = text;
+
+		/* initialize text component */
+
+		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour); // creates surface
+		m_texture = SDL_CreateTextureFromSurface(m_renderer, m_textLabel);
+
 		// set position and scale of the texture
 		int textWidth, textHeight;
 		TTF_SizeText(m_font, text, &textWidth, &textHeight);
@@ -45,11 +68,20 @@ public:
 
 	void SetStyle(int style)
 	{
-		TTF_SetFontStyle(m_font, style);
+		m_style = style;
+	}
+
+	void SetPosition(int x, int y)
+	{
+		m_xPos = x;
+		m_yPos = y;
+		m_textBox.x = x;
+		m_textBox.y = y;
 	}
 
 	void Draw()
 	{
+		TTF_SetFontStyle(m_font, m_style);
 		SDL_RenderCopy(m_renderer, m_texture, NULL, &m_textBox);
 	}
 
@@ -71,5 +103,8 @@ public:
 		// render the texture
 		SDL_RenderCopy(m_renderer, m_texture, NULL, &m_textBox);
 	}
+
+	int GetWidth() { return m_textLabel->w; }
+	int GetHeight() { return m_textLabel->h; }
 
 };

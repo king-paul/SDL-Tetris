@@ -24,8 +24,13 @@ public:
 
 		m_colorNormal = backgroundColor;
 
-		m_text = new Text(m_renderer, font, textColour, posX + width/4, posY + height/4, text);
+		m_text = new Text(m_renderer, font, textColour, text);
 		m_text->SetStyle(TTF_STYLE_BOLD);
+
+		// position text on center of button
+		int paddingLeft = (m_background.w - m_text->GetWidth()) / 2;
+		int paddingTop = (m_background.h - m_text->GetHeight()) / 2;
+		m_text->SetPosition(m_background.x + paddingLeft, m_background.y + paddingTop);
 	}
 
 	~Button()

@@ -7,7 +7,6 @@ class SDLGame;
 
 class MainMenu
 {
-
 public:
 	MainMenu(SDLGame* app);
 	~MainMenu();	
@@ -18,9 +17,12 @@ private:
 	SDLGame* app;
 
 	TTF_Font* buttonFont = nullptr;
-	TTF_Font* titleFont = nullptr;
+	TTF_Font* regularFont = nullptr;
 
-	Text* title;
+	//Text* title;
+	Sprite* logo;
+	Text* version;
+	Text* creator;
 
 	Button* playButton = nullptr;	
 	Button* quitButton = nullptr;
