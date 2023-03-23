@@ -21,13 +21,16 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\SDLGame.cpp">
+    <ClCompile Include="src\SDLApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Tetris.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MainMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GameScreen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -797,7 +800,7 @@
     <ClInclude Include="src\Constants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\SDLGame.h">
+    <ClInclude Include="src\SDLApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Tetris.h">
@@ -819,6 +822,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Sprite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GameScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

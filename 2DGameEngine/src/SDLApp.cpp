@@ -1,34 +1,37 @@
-#include "SDLGame.h"
-#include "MainMenu.h"
+#include "SDLApp.h"
 #include "Constants.h"
+#include "MainMenu.h"
+#include "GameScreen.h"
 
 #include <iostream>
 #include <string>
 
-SDLGame::SDLGame(int width, int height) : window(nullptr), renderer(nullptr)
+SDLApp::SDLApp(int width, int height)
 {
-	InitializeSDL(width, height);
+	InitializeSDL(width, height);	
 
 	// load fonts
-	arial_24 = TTF_OpenFont("assets/fonts/arial.ttf", 24);
-	arial_48 = TTF_OpenFont("assets/fonts/arial.ttf", 48);
+	//arial_24 = TTF_OpenFont("assets/fonts/arial.ttf", 24);
+	//arial_48 = TTF_OpenFont("assets/fonts/arial.ttf", 48);
 
+	/*
 	if (arial_24 == nullptr || arial_48 == nullptr)
 	{
 		cout << TTF_GetError() << endl;
-	}
+	}*/
 
 	// Start the main menu
 
 	gameState = MAIN_MENU;
-	mainMenu = new MainMenu(this);
+	mainMenu = new MainMenu();
 
-	alpha = 0;
-	fadeIn = true;	
+	//alpha = 0;
+	//fadeIn = true;	
 }
 
-SDLGame::~SDLGame()
+SDLApp::~SDLApp()
 {
+	/*
 	if (game != nullptr)
 	{
 		delete game;
@@ -55,21 +58,29 @@ SDLGame::~SDLGame()
 	delete blockRed;
 	delete blockYellow;
 	
-	delete mainMenu;
+	delete mainMenu;*/
 
 	//delete music;
 
-	TTF_CloseFont(arial_24);
-	TTF_CloseFont(arial_48);
+	//TTF_CloseFont(arial_24);
+	//TTF_CloseFont(arial_48);
 }
 
-void SDLGame::StartGame()
+static SDLApp instance(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+SDLApp& SDLApp::GetInstance()
+{	
+	return instance;
+}
+
+void SDLApp::StartGame()
 {
 	/** Create stats panel **/
 
 	//int panelLeft = WINDOW_WIDTH / 2 + 10;
 
 	// create next piece panel
+	/*
 	int borderWith = TILE_SIZE * 5;
 	int borderHeight = TILE_SIZE * 5;
 	nextPieceBorder = { MARGIN_LEFT, MARGIN_TOP + 32, borderWith, borderHeight };
@@ -117,14 +128,18 @@ void SDLGame::StartGame()
 	music->Play();
 	game = new Tetris();
 	game->LoadNextPiece();
+	*/
+
+	gameScreen = new GameScreen();
+	SetState(RUNNING);
 }
 
-bool SDLGame::IsRunning() const
+bool SDLApp::IsRunning() const
 {
 	return gameState != QUIT;
 }
 
-void SDLGame::InitializeSDL(int width, int height)
+void SDLApp::InitializeSDL(int width, int height)
 {
 	// initiatlize SDL and ensure that it worked
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -161,18 +176,14 @@ void SDLGame::InitializeSDL(int width, int height)
 		cout << TTF_GetError() << endl;
 
 	// initialize audio
-	Mix_Init(0);// != 0) // parameter 0 = wave files
-	//{
-	//	std::cout << "Mixer initialized successfully";
-	//}
-
+	Mix_Init(0); // parameter 0 = wave files
 	Mix_Init(MIX_INIT_MP3);
 
 	// open and play audio
 	Mix_OpenAudio(AUDIO_FREQUENCY, MIX_DEFAULT_FORMAT, AUDIO_CHANNELS, AUDIO_CHUNK_SIZE);
 }
 
-void SDLGame::ProcessInput()
+void SDLApp::ProcessInput()
 {
 	SDL_Event event;
 	SDL_PollEvent(&event);
@@ -203,8 +214,11 @@ void SDLGame::ProcessInput()
 			}
 
 			// if game is running, handle the move input
-			if (!game->GameOver())
+			if (gameScreen != nullptr)
 			{
+				gameScreen->HandleInput(event.key.keysym.sym);
+
+				/*
 				switch (event.key.keysym.sym)
 				{				
 					case SDLK_ESCAPE:
@@ -251,7 +265,7 @@ void SDLGame::ProcessInput()
 							//game->IncreaseLevel();
 							game->SendPieceToBottom();
 						break;
-				}
+				}*/
 			}
 
 			keyPressed = true;
@@ -291,7 +305,7 @@ void SDLGame::ProcessInput()
 	}
 }
 
-void SDLGame::Update()
+void SDLApp::Update()
 {
 	// Sleep the execution until we reach the target frame time in millisceonds
 	int timeToWait = FRAME_TARGET_TIME - (SDL_GetTicks() - ticksLastFrame);
@@ -310,29 +324,23 @@ void SDLGame::Update()
 	ticksLastFrame = SDL_GetTicks();
 
 	if (gameState == MAIN_MENU)
-		mainMenu->Update();
-
-	if (gameState == RUNNING)
 	{
-		if (game->FormedLines())
+		mainMenu->Update();
+	}
+	else if (gameState != QUIT)
+	{
+		if (mainMenu != nullptr)
 		{
-			if (fadeCompleted)
-			{
-				game->ClearLinesFound();
-				fadeCompleted = false;
-				fadeIn = true;
-			}
+			delete mainMenu;
+			mainMenu = nullptr;
 		}
-		else if (!game->GameOver())
-		{
-			/* Update the tetris game */
-			game->Update(deltaTime);
-		}
+
+		gameScreen->Update(deltaTime);
 	}
 
 }
 
-void SDLGame::Render()
+void SDLApp::Render()
 {
 	/* draw graphics on screen */
 	if (gameState == MAIN_MENU)
@@ -341,6 +349,9 @@ void SDLGame::Render()
 	}
 	else if(gameState != QUIT) // on the game screen
 	{
+		gameScreen->Render();
+
+		/*
 		SetRenderColor(Color::GRAY); // sets the background colour
 		SDL_RenderClear(renderer); // clears the back render buffer
 
@@ -368,7 +379,7 @@ void SDLGame::Render()
 		{
 			gameOverText->Draw();
 			promptUserText->Draw();
-		}
+		}*/
 	}
 
 	/* end of graphics draw */
@@ -377,8 +388,14 @@ void SDLGame::Render()
 }
 
 // deletes memory from heap created by SDL
-void SDLGame::Destroy()
+void SDLApp::Destroy()
 {	
+	if (mainMenu != nullptr)
+		delete mainMenu;
+
+	if (gameScreen != nullptr)
+		delete gameScreen;
+
 	Mix_CloseAudio();
 
 	SDL_DestroyRenderer(renderer);
@@ -387,183 +404,7 @@ void SDLGame::Destroy()
 	SDL_Quit(); // closes the program
 }
 
-void SDLGame::SetRenderColor(SDL_Color color)
+void SDLApp::SetRenderColor(SDL_Color color)
 {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
-}
-
-void SDLGame::DrawBoard()
-{
-	SetRenderColor(Color::BLACK);
-	SDL_RenderFillRect(renderer, &field);
-
-	if (showGrid)
-	{
-		SetRenderColor(Color::MAROON);
-
-		// hoirzontal lines
-		for (int y = 0; y < ROWS; y++)
-		{
-			SDL_RenderDrawLine(renderer, GRID_OFFSET_X + 1, GRID_OFFSET_Y + y * TILE_SIZE,
-				GRID_OFFSET_X - 1 + TILE_SIZE * COLS, GRID_OFFSET_Y + y * TILE_SIZE);
-		}
-
-		//vertical lines
-		for (int x = 0; x < COLS; x++)
-		{
-			SDL_RenderDrawLine(renderer, GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + 1,
-				GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y - 1 + ROWS * TILE_SIZE);
-		}
-	}
-
-	auto gameField = game->GetField();
-
-	Sprite* blockToDraw = nullptr;
-
-	// draw coloured squares
-	for (int y = 0; y < ROWS; y++)
-	{
-		for (int x = 0; x < COLS; x++)
-		{
-			int boardValue = game->GetBoardValue(x, y);
-
-			if (boardValue != 0)
-			{
-				switch (boardValue)
-				{
-					case 0:	break;
-					case 1: blockToDraw = blockCyan; break;
-					case 2: blockToDraw = blockPurple; break;
-					case 3: blockToDraw = blockYellow; break;
-					case 4: blockToDraw = blockBlue; break;
-					case 5: blockToDraw = blockOrange; break;
-					case 6: blockToDraw = blockGreen; break;
-					case 7: blockToDraw = blockRed; break;
-					case 8: SetRenderColor(Color::BLACK); break;
-					case 9: SetRenderColor(Color::GRAY); break;
-				}
-
-				SDL_Rect square = { GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
-
-				if (boardValue == 8 || boardValue == 9)		
-					SDL_RenderFillRect(renderer, &square);				
-				else				
-					blockToDraw->Draw(&square);
-				
-			}
-		}
-	}
-
-}
-
-void SDLGame::DrawTetromino(bool nextPiece)
-{
-	Tetromino* piece = (nextPiece) ? game->GetNextPiece() : game->GetCurrentPiece();
-	int count = 0;
-
-	// create square locations on screen for tetromino
-	for (int y = 0; y < piece->size; y++)
-	{
-		for (int x = 0; x < piece->size; x++)
-		{
-			if (piece->tiles[y][x] == true)
-			{
-				if (nextPiece)
-				{
-					int padding = (piece->size < 4) ? TILE_SIZE : 0;
-
-					nextTetromino[count] = { nextPieceBorder.x + (TILE_SIZE / 2) + (x * TILE_SIZE) + padding,
-											 nextPieceBorder.y + (TILE_SIZE / 2) + (y * TILE_SIZE) + padding,
-											 TILE_SIZE, TILE_SIZE };
-				}
-				else
-				{
-					tetromino[count] = { piece->posX * TILE_SIZE + (x * TILE_SIZE) + GRID_OFFSET_X,
-										 piece->posY * TILE_SIZE + (y * TILE_SIZE) + GRID_OFFSET_Y + 1,
-										 TILE_SIZE, TILE_SIZE };
-				}
-				count++;
-			}
-		}
-	}
-
-	Sprite* blockToDraw = nullptr;
-
-	switch (piece->type)
-	{
-		case 0: blockToDraw = blockCyan; break;
-		case 1: blockToDraw = blockPurple; break;
-		case 2: blockToDraw = blockYellow; break;
-		case 3: blockToDraw = blockBlue; break;
-		case 4: blockToDraw = blockOrange; break;
-		case 5: blockToDraw = blockGreen; break;
-		case 6: blockToDraw = blockRed; break;
-	}
-
-	if (nextPiece)
-	{
-		for (SDL_Rect square : nextTetromino)
-		{
-			blockToDraw->Draw(&square);
-		}
-	}
-	else
-	{
-		for (SDL_Rect square : tetromino)
-		{			
-			blockToDraw->Draw(&square);
-		}
-	}
-}
-
-void SDLGame::FadeLineDisplay()
-{
-	if (fadeIn)
-		alpha += 15;
-	else
-		alpha -= 15;
-
-	auto lines = game->GetLines();
-
-	// iterates through all rows where there is a line and fills them with a green rectangle
-	for (unsigned int i = 0; i < lines.size(); i++)
-	{
-		SDL_Rect line = { GRID_OFFSET_X + TILE_SIZE, GRID_OFFSET_Y + lines[i] * TILE_SIZE,
-						  TILE_SIZE * (FIELD_WIDTH - 2), TILE_SIZE};
-
-		SDL_SetRenderDrawColor(renderer, 0, 255, 0, alpha);		
-		SDL_RenderFillRect(renderer, &line);
-	}
-
-	if (alpha >= 255)
-	{
-		fadeIn = false;
-		alpha = 255;
-	}
-
-	if (!fadeIn && alpha <= 0)
-	{
-		fadeCompleted = true;
-		alpha = 0;
-	}
-
-}
-
-void SDLGame::DrawStats()
-{
-	// draw text labels
-	nextPieceLabel->Draw();
-	scoreLabel->Draw();
-	levelLabel->Draw();
-	linesLabel->Draw();
-	placedLabel->Draw();
-
-	// draw values next to labels
-	scoreValue->Draw(to_string(game->Score()).c_str());
-	levelValue->Draw(to_string(game->Level()).c_str());
-	linesValue->Draw(to_string(game->LinesFormed()).c_str());
-	placedValue->Draw(to_string(game->PiecesPlaced()).c_str());
-
-	SetRenderColor(Color::WHITE);
-	SDL_RenderDrawRect(renderer, &nextPieceBorder);
 }

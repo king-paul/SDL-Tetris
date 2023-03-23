@@ -3,23 +3,21 @@
 #include "Button.h"
 #include "Sprite.h"
 
-class SDLGame;
+class SDLApp;
 
 class MainMenu
 {
 public:
-	MainMenu(SDLGame* app);
+	MainMenu();
 	~MainMenu();	
 	void Update();
 	void Draw();
 
-private:
-	SDLGame* app;
+private:	
 
 	TTF_Font* buttonFont = nullptr;
 	TTF_Font* regularFont = nullptr;
 
-	//Text* title;
 	Sprite* logo;
 	Text* version;
 	Text* creator;

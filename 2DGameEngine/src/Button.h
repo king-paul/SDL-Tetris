@@ -7,15 +7,16 @@
 #include "Colors.h"
 #include "text.h"
 
-#include "SDLGame.h"
+#include "SDLApp.h"
 
 class Button
 {
 public:
-	Button(SDLGame* app, TTF_Font* font, int width, int height, int posX, int posY, const char* text,
-		   SDL_Color backgroundColor = Color::SILVER, SDL_Color textColour = Color::BLACK) 
-		 : m_renderer(app->GetRenderer()), m_window(app->GetWindow()), app(app)
+	Button(TTF_Font* font, int width, int height, int posX, int posY, const char* text,
+		SDL_Color backgroundColor = Color::SILVER, SDL_Color textColour = Color::BLACK)
+		: app(SDLApp::GetInstance())
 	{
+
 		// set background properties
 		m_background.w = width;
 		m_background.h = height;
@@ -24,7 +25,7 @@ public:
 
 		m_colorNormal = backgroundColor;
 
-		m_text = new Text(m_renderer, font, textColour, text);
+		m_text = new Text(app.GetRenderer(), font, textColour, text);
 		m_text->SetStyle(TTF_STYLE_BOLD);
 
 		// position text on center of button
@@ -53,7 +54,7 @@ public:
 			SetRenderColor(m_colourHover);
 		else
 			SetRenderColor(m_colorNormal);
-		SDL_RenderFillRect(m_renderer, &m_background); // draws the background
+		SDL_RenderFillRect(app.GetRenderer(), &m_background); // draws the background
 
 		m_text->Draw(); // renders the text
 	}
@@ -68,7 +69,7 @@ public:
 		int boundsBottom = m_background.y + m_background.h;
 
 		SDL_GetGlobalMouseState(&globalX, &globalY);
-		SDL_GetWindowPosition(m_window, &windowX, &windowY);
+		SDL_GetWindowPosition(app.GetWindow(), &windowX, &windowY);
 		SDL_GetMouseState(&x, &y); // position of mouse relative to window
 
 		// check that cursor is on window
@@ -84,13 +85,13 @@ public:
 
 	bool Pressed()
 	{		
-		mousePressed = app->MousePressed();
+		mousePressed = app.MousePressed();
 		return Rollover() && mousePressed;
 	}
 
 	bool Clicked()
 	{		
-		if (mousePressed && Rollover() && !app->MousePressed())
+		if (mousePressed && Rollover() && !app.MousePressed())
 		{
 			mousePressed = false;
 			return true;
@@ -101,9 +102,7 @@ public:
 
 private:
 
-	SDLGame* app;
-	SDL_Window* m_window;
-	SDL_Renderer* m_renderer;
+	SDLApp& app;
 
 	SDL_Rect m_background;
 	Text* m_text;
@@ -117,7 +116,7 @@ private:
 
 	void SetRenderColor(SDL_Color color)
 	{
-		SDL_SetRenderDrawColor(m_renderer, color.r, color.g, color.b, color.a);
+		SDL_SetRenderDrawColor(app.GetRenderer(), color.r, color.g, color.b, color.a);
 	}
 
 };

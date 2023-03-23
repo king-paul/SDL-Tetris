@@ -14,6 +14,7 @@
 #include "sprite.h"
 
 class MainMenu;
+class GameScreen;
 
 enum GameState
 {
@@ -24,12 +25,14 @@ enum GameState
 	QUIT
 };
 
-class SDLGame 
+class SDLApp 
 {
 public:
-	SDLGame(int width, int height);
-	~SDLGame();
-	int ticksLastFrame = 0;
+	SDLApp(int width, int height);
+	~SDLApp();
+
+	static SDLApp& GetInstance();
+
 	bool IsRunning() const;
 
 	void ProcessInput();
@@ -42,6 +45,7 @@ public:
 	// getters
 	SDL_Window* GetWindow() { return window; }
 	SDL_Renderer* GetRenderer() { return renderer; }
+	bool KeyPressed() { return keyPressed; }
 	bool MousePressed() { return leftMouseDown; }
 
 	// setters
@@ -49,14 +53,25 @@ public:
 	//void SetRenderColor(ColorName color);
 	void SetRenderColor(SDL_Color color);
 
+	// variables
+	int ticksLastFrame = 0;
+
 private:
+
 	GameState gameState;
 	SDL_Window* window;
-	SDL_Renderer* renderer;	
+	SDL_Renderer* renderer;
 	MainMenu* mainMenu;
-	Tetris* game;
+	GameScreen* gameScreen;
+
+	// input variables
+	bool keyPressed = false;
+	bool leftMouseDown = false;
+
+	//Tetris* game;
 
 	// game objects	
+	/*
 	SDL_Rect tetromino[4];
 	SDL_Rect nextTetromino[4];
 
@@ -72,34 +87,16 @@ private:
 	Sprite* blockOrange;
 	Sprite* blockPurple;
 	Sprite* blockRed;
-	Sprite* blockYellow;
-
-	// input variables
-	bool keyPressed = false;
-	bool leftMouseDown = false;
+	Sprite* blockYellow;	
 
 	// drawing options
 	bool showGrid = false;
+	*/
 
 	void InitializeSDL(int width, int height);
 
-	// drawing functions
-	void DrawBoard();
-	void DrawTetromino(bool nextPiece);
-	
-	void FadeLineDisplay();
-	void DrawStats();
-
-	// line display fading
-	int alpha = 0;
-	bool fadeIn = false;
-	bool fadeCompleted = false;
-
-	// fonts
-	TTF_Font* arial_24;
-	TTF_Font* arial_48;
-
 	// text labels
+	/*
 	Text* nextPieceLabel;
 	Text* scoreLabel;
 	Text* scoreValue;
@@ -117,7 +114,7 @@ private:
 	Sound* rotateSound;
 
 	int textWidth;
-	int textHeight;
+	int textHeight;*/
 };
 
 #endif

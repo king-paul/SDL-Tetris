@@ -1,22 +1,21 @@
 #include <iostream>
 
 #include "Constants.h"
-#include "SDLGame.h"
+#include "SDLApp.h"
 
 int main(int argc, char* argv[]) 
 {
-    SDLGame* app = new SDLGame(WINDOW_WIDTH, WINDOW_HEIGHT);
+    //SDLGame::instance = nullptr;
+    SDLApp& app = SDLApp::GetInstance();// new SDLGame(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-    while (app->IsRunning())
+    while (app.IsRunning())
     {
-        app->ProcessInput();
-        app->Update();
-        app->Render();
+        app.ProcessInput();
+        app.Update();
+        app.Render();
     }
 
-    app->Destroy();
-
-    delete app;
+    app.Destroy();
 
     return 0;
 }
