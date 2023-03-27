@@ -19,7 +19,7 @@ public:
 	void Update(float deltaTime);
 	void Render();
 
-	void HandleInput(SDL_Keycode keypressed);
+	void HandleInput(SDL_Keycode keyPressed);
 
 private:	
 	Tetris* game;
@@ -37,6 +37,7 @@ private:
 
 	std::map<string, Sprite*> blocks;
 	std::map<string, Text*> textLabels;
+	Sprite* background;
 
 	// sound and music
 	Sound* music;

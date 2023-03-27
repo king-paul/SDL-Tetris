@@ -39,28 +39,11 @@ public:
 	{
 		Mix_HaltMusic();
 	}
+	
+	static void VolumeUp(int amount);
+	static void VolumeDown(int amount);
 
-	/*
-	static void VolumeUp(int amount)
-	{
-		musicVolume += amount;
-
-		if (musicVolume > 128)
-			musicVolume = 128;
-
-		Mix_VolumeMusic(musicVolume);
-		std::cout << "Music Volume: " << musicVolume << std::endl;
-	}
-
-	static void VolumeDown(int amount)
-	{
-		musicVolume -= amount;
-		if (musicVolume < 0)
-			musicVolume = 0;
-
-		Mix_VolumeMusic(musicVolume);
-		std::cout << "Music Volume: " << musicVolume << std::endl;
-	}*/
+	static void ToggleMute();
 	
 };
 
@@ -90,25 +73,7 @@ public:
 	{
 		Mix_HaltChannel(-1);
 	}
-
-	/*
-	static void VolumeUp(int amount)
-	{
-		if (soundVolume > 128)
-			soundVolume = 128;
-
-		Mix_Volume(-1, soundVolume);
-		std::cout << "Sound Effect Volume: " << musicVolume << std::endl;
-	}
-
-	static void VolumeDown(int amount)
-	{
-		soundVolume -= amount;
-		if (soundVolume < 0)
-			soundVolume = 0;
-
-		Mix_Volume(-1, soundVolume);
-		std::cout << "Sound Effect Volume: " << musicVolume << std::endl;
-	}*/
 	
+	static void VolumeUp(int amount);
+	static void VolumeDown(int amount);
 };

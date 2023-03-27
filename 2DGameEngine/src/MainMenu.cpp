@@ -6,6 +6,7 @@ MainMenu::MainMenu()
 	SDLApp& app = SDLApp::GetInstance();
 
 	// load images
+	background = new Sprite("assets/images/metal.jpg", app.GetRenderer());
 	logo = new Sprite("assets/images/title.png", app.GetRenderer());
 
 	// load fonts
@@ -58,8 +59,13 @@ void MainMenu::Draw()
 	SDLApp& app = SDLApp::GetInstance();
 
 	// sets the background colour
-	app.SetRenderColor({ 50, 50, 50, 255 });
+	//app.SetRenderColor({ 50, 50, 50, 255 });
+	//SDL_Rect source = { 0, 0, 1920, 1200 };
+	//SDL_Rect desintation{}
+	//SDL_RenderCopy(app.GetRenderer(), background->GetTexture(), &source, { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT });
+	
 	SDL_RenderClear(app.GetRenderer());
+	background->Draw(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	// show title logo
 	logo->Draw(100, 50);

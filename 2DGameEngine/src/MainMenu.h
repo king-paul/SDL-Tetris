@@ -19,6 +19,8 @@ private:
 	TTF_Font* regularFont = nullptr;
 
 	Sprite* logo;
+	Sprite* background;
+
 	Text* version;
 	Text* creator;
 

@@ -102,16 +102,6 @@ void SDLApp::ProcessInput()
 
 			switch (keyCode)
 			{
-				/*
-				// pause/unpause the game if ESC is pressed
-				case SDLK_ESCAPE:
-
-				if (gameState == RUNNING)
-					gameState = PAUSED;
-				else if (gameState == PAUSED)
-					gameState = RUNNING;
-				break;*/
-
 				case SDLK_EQUALS:
 					Sound::VolumeUp(8);					
 				break;
@@ -120,12 +110,13 @@ void SDLApp::ProcessInput()
 					Sound::VolumeDown(8);
 				break;
 
+
 				// if game is running, handle the move input
 				default:
-				if (gameScreen != nullptr)
-				{
-					gameScreen->HandleInput(keyCode);
-				}
+					if (gameScreen != nullptr)
+					{
+						gameScreen->HandleInput(keyCode);
+					}
 				break;
 			}
 

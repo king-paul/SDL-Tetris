@@ -13,7 +13,7 @@ GameScreen::GameScreen()
 
 	// load fonts
 	arial_24 = TTF_OpenFont("assets/fonts/arial.ttf", 24);
-	arial_48 = TTF_OpenFont("assets/fonts/arial.ttf", 48);
+	arial_48 = TTF_OpenFont("assets/fonts/arial.ttf", 48);	
 
 	// create text lebels
 	textLabels.emplace("nextPieceLabel", new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE"));
@@ -38,6 +38,9 @@ GameScreen::GameScreen()
 		std::cerr << "Error creating SDL renderer." << std::endl;
 		return;
 	}
+
+	// load images
+	background = new Sprite("assets/images/metal.jpg", app.GetRenderer());
 
 	// Load block tile sprites
 	blocks.emplace("blue", new Sprite("assets/images/blue.png", renderer));
@@ -70,6 +73,8 @@ GameScreen::GameScreen()
 
 GameScreen::~GameScreen()
 {
+	delete background;
+
 	// delete all text labels and empty map
 	for (std::pair<string, Text*> text : textLabels)
 	{
@@ -121,7 +126,7 @@ void GameScreen::Update(float deltaTime)
 			fadeIn = true;
 		}
 	}
-	else if (!game->GameOver())
+	else if (SDLApp::GetInstance().GetState() == RUNNING)
 	{
 		/* Update the tetris game */
 		game->Update(deltaTime);
@@ -135,9 +140,11 @@ void GameScreen::Render()
 	app.SetRenderColor(Color::GRAY); // sets the background colour
 	SDL_RenderClear(renderer); // clears the back render buffer
 
+	background->Draw(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT); // draw background image
+
 	// color right-hand side of window a dark grey colour
-	app.SetRenderColor({ 21, 21, 21, 255 });
-	SDL_RenderFillRect(renderer, &rightHandPanel);
+	//app.SetRenderColor({ 21, 21, 21, 255 });
+	//SDL_RenderFillRect(renderer, &rightHandPanel);
 
 	DrawBoard();
 
@@ -162,58 +169,80 @@ void GameScreen::Render()
 	}
 }
 
-void GameScreen::HandleInput(SDL_Keycode keypressed)
+void GameScreen::HandleInput(SDL_Keycode keyPressed)
 {
-	SDLApp& app = SDLApp::GetInstance();
+	SDLApp& app = SDLApp::GetInstance();;
+	GameState state = SDLApp::GetInstance().GetState();
 
-	if (game->GameOver())
-		return;
-
-	switch (keypressed)
+	if (keyPressed == SDLK_ESCAPE)
 	{
-		case SDLK_ESCAPE:
-			//if (game->GameOver())
-				app.SetState(QUIT);			
-				//app.SetState(PAUSED);
-			break;
+		if(state == RUNNING)
+		{
+			app.SetState(PAUSED);
+			music->Stop();
+			std::cout << "Game Paused" << std::endl;
+		}
+		else if (state == PAUSED)
+		{
+			music->Play();
+			app.SetState(RUNNING);
+			std::cout << "Game Resumed" << std::endl;
+		}
+		if (state == GAME_OVER)
+		{
+			app.SetState(MAIN_MENU);
+		}
+	}
+	else if(state == RUNNING)
+	{
+		switch (keyPressed)
+		{
+			case SDLK_p:
 
-		case SDLK_LEFT: case SDLK_a:
-			game->MovePieceLeft();
-			break;
+				break;
 
-		case  SDLK_RIGHT: case SDLK_d:
-			game->MovePieceRight();
-			break;
+			case SDLK_LEFT: case SDLK_a:
+					game->MovePieceLeft();
+				break;
 
-		case SDLK_DOWN: case SDLK_s:
-			game->MovePieceDown();
-			break;
+			case SDLK_RIGHT: case SDLK_d:
+					game->MovePieceRight();
+				break;
 
-		case SDLK_UP: case SDLK_w:
-			if (!app.KeyPressed()) // restrict rotation to once per key press					
-				game->RotateCurrentPiece(true); // clockwise rotation
-			break;
+			case SDLK_DOWN: case SDLK_s:
+					game->MovePieceDown();
+				break;
 
-		case SDLK_q:
-			if (!app.KeyPressed()) // restrict rotation to once per key press					
-				game->RotateCurrentPiece(false); // counter clockwise rotation
-			break;
+			case SDLK_UP: case SDLK_w:
+				if (!app.KeyPressed()) // restrict rotation to once per key press		
+					game->RotateCurrentPiece(true); // clockwise rotation
+				break;
 
-		case SDLK_e:
-			if (!app.KeyPressed()) // restrict rotation to once per key press					
-				game->RotateCurrentPiece(true); // clockwise rotation
-			break;
+			case SDLK_q:
+				if (!app.KeyPressed()) // restrict rotation to once per key press
+					game->RotateCurrentPiece(false); // counter clockwise rotation
+				break;
 
-		case SDLK_g:
-			if (!app.KeyPressed())
-				showGrid = !showGrid;
-			break;
+			case SDLK_e:
+				if (!app.KeyPressed()) // restrict rotation to once per key press
+					game->RotateCurrentPiece(true); // clockwise rotation
+				break;
 
-		case SDLK_SPACE:
-			if (!app.KeyPressed())
-				//game->IncreaseLevel();
-				game->SendPieceToBottom();
+			case SDLK_g:
+				if (!app.KeyPressed())
+					showGrid = !showGrid;
+				break;
+
+			case SDLK_SPACE:
+				if (!app.KeyPressed())
+					//game->IncreaseLevel();
+					game->SendPieceToBottom();
+				break;
+
+			case SDLK_m:
+				Music::ToggleMute();
 			break;
+		}
 	}
 }
 
@@ -223,6 +252,8 @@ void GameScreen::DrawBoard()
 
 	app.SetRenderColor(Color::BLACK);
 	SDL_RenderFillRect(renderer, &field);
+
+	// TODO : Add Board Background
 
 	if (showGrid)
 	{

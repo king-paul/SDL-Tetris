@@ -27,15 +27,17 @@ public:
 
 	~Sprite()
 	{
-		
+		SDL_DestroyTexture(texture);
 	}
+
+	SDL_Texture* GetTexture() { return texture; }
 
 	void Draw(SDL_Rect *destination)
 	{
 		SDL_RenderCopy(m_renderer, texture, &sourceRect, destination);
 	}
 
-	void Draw(int x, int y)
+	void Draw(int x = 0, int y = 0)
 	{
 		SDL_Rect destinationRect = { x, y, sourceRect.w , sourceRect.h };
 		SDL_RenderCopy(m_renderer, texture, &sourceRect, &destinationRect);

@@ -52,6 +52,9 @@ public:
 	//void SetRenderColor(ColorName color);
 	void SetRenderColor(SDL_Color color);
 
+	// getters
+	GameState GetState() { return gameState; }
+
 	// variables
 	int ticksLastFrame = 0;
 
