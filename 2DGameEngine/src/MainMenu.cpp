@@ -26,7 +26,7 @@ MainMenu::MainMenu()
 	quitButton->SetColours(Color::RED, Color::YELLOW, Color::MAROON);
 
 	titleMusic = new Music("assets/sounds/Title.mp3");
-	titleMusic->Play();
+	titleMusic->Play(64);
 }
 
 MainMenu::~MainMenu()

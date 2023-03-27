@@ -5,8 +5,11 @@
 class Sound
 {
 public:	
-	virtual void Play(int loops) = 0;
+	virtual void Play(int loops = 0) = 0;
 	virtual void Stop() = 0;
+
+	static void VolumeUp(int amount);
+	static void VolumeDown(int amount);
 };
 
 class Music : public Sound
@@ -17,24 +20,48 @@ private:
 public:
 	Music(const char* filename)
 	{
-		music = Mix_LoadMUS(filename);		
-
-		//Mix_Volume(0, 128);
+		music = Mix_LoadMUS(filename);	
+		
 		if (!music)
 		{
 			std::cout << "Music Error: " << Mix_GetError() << std::endl;
 		}
 	}
 
-	void Play(int loops = -1) override
+	~Music()
 	{
-		Mix_PlayMusic(music, loops); // -1 = loops indefinitely
+		Mix_FreeMusic(music);
 	}
+
+	void Play(int loops = -1) override;
 
 	void Stop() override
 	{
 		Mix_HaltMusic();
 	}
+
+	/*
+	static void VolumeUp(int amount)
+	{
+		musicVolume += amount;
+
+		if (musicVolume > 128)
+			musicVolume = 128;
+
+		Mix_VolumeMusic(musicVolume);
+		std::cout << "Music Volume: " << musicVolume << std::endl;
+	}
+
+	static void VolumeDown(int amount)
+	{
+		musicVolume -= amount;
+		if (musicVolume < 0)
+			musicVolume = 0;
+
+		Mix_VolumeMusic(musicVolume);
+		std::cout << "Music Volume: " << musicVolume << std::endl;
+	}*/
+	
 };
 
 class SoundEffect : public Sound
@@ -52,13 +79,36 @@ public:
 		}
 	}
 
-	void Play(int loops = 0) override
+	~SoundEffect()
 	{
-		Mix_PlayChannel(-1, sound, loops); // -1 = first available channel
+		Mix_FreeChunk(sound);
 	}
+
+	void Play(int loops = 0) override;
 
 	void Stop() override
 	{
 		Mix_HaltChannel(-1);
 	}
+
+	/*
+	static void VolumeUp(int amount)
+	{
+		if (soundVolume > 128)
+			soundVolume = 128;
+
+		Mix_Volume(-1, soundVolume);
+		std::cout << "Sound Effect Volume: " << musicVolume << std::endl;
+	}
+
+	static void VolumeDown(int amount)
+	{
+		soundVolume -= amount;
+		if (soundVolume < 0)
+			soundVolume = 0;
+
+		Mix_Volume(-1, soundVolume);
+		std::cout << "Sound Effect Volume: " << musicVolume << std::endl;
+	}*/
+	
 };

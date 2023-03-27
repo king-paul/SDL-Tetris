@@ -98,19 +98,35 @@ void SDLApp::ProcessInput()
 				
 		case SDL_KEYDOWN: {
 
-			// pause/unpause the game if ESC is pressed
-			if (event.key.keysym.sym == SDLK_ESCAPE)
+			auto keyCode = event.key.keysym.sym;
+
+			switch (keyCode)
 			{
+				/*
+				// pause/unpause the game if ESC is pressed
+				case SDLK_ESCAPE:
+
 				if (gameState == RUNNING)
 					gameState = PAUSED;
 				else if (gameState == PAUSED)
 					gameState = RUNNING;
-			}
+				break;*/
 
-			// if game is running, handle the move input
-			if (gameScreen != nullptr)
-			{
-				gameScreen->HandleInput(event.key.keysym.sym);
+				case SDLK_EQUALS:
+					Sound::VolumeUp(8);					
+				break;
+
+				case SDLK_MINUS:					
+					Sound::VolumeDown(8);
+				break;
+
+				// if game is running, handle the move input
+				default:
+				if (gameScreen != nullptr)
+				{
+					gameScreen->HandleInput(keyCode);
+				}
+				break;
 			}
 
 			keyPressed = true;

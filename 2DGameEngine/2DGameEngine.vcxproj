@@ -156,6 +156,7 @@
     <ClCompile Include="src\MainMenu.cpp" />
     <ClCompile Include="src\SDLApp.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Sound.cpp" />
     <ClCompile Include="src\Tetris.cpp" />
   </ItemGroup>
   <ItemGroup>

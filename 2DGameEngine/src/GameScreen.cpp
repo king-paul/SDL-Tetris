@@ -106,7 +106,7 @@ void GameScreen::Update(float deltaTime)
 		}
 		else
 		{
-			soundEffects[soundEvent]->Play(0);
+			soundEffects[soundEvent]->Play();
 		}
 	}
 
