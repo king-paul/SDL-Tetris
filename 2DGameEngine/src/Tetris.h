@@ -13,6 +13,18 @@ using namespace std;
 
 typedef array<array <bool, 4>, 4> PieceType;
 
+enum Event
+{
+	Null = -1,
+	MovePiece,
+	RotatePiece,
+	PieceLanded,
+	LineClear,
+	Tetris4Lines,
+	LevelUp,
+	GameOver
+};
+
 struct Tetromino
 {	
 	Tetromino() {} // default constructor
@@ -57,9 +69,9 @@ public:
 	void MovePieceLeft();
 	void MovePieceRight();
 	void MovePieceDown();
-	void ClearLinesFound();	
-
+	void ClearLinesFound();
 	void IncreaseLevel();
+	//void TriggerGameOver();
 
 	// getters
 	unsigned int GetBoardValue(int x, int y){ return m_playField[y][x]; }
@@ -73,9 +85,11 @@ public:
 	int LinesFormed() { return m_linesFormed; }
 	int Level() { return m_level; }
 	bool GameOver() { return m_gameOver; }
+	Event GetEvent() { return m_event; }
 
 	// setters
 	void SendPieceToBottom() { m_sendToBottom = true; }
+	void ResetEvent() { m_event = Null; }
 
 	/// <summary>
 	/// Checks whether or not a tetromino with a specified orientation will fit
@@ -113,6 +127,6 @@ private:
 	bool m_gameOver = false;
 
 	vector<int> m_linesFound; // stores row numbers where lines have been formed
+
+	Event m_event; // records last event for sound effects
 };
-
-

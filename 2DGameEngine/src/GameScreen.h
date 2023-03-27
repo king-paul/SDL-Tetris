@@ -38,37 +38,28 @@ private:
 	std::map<string, Sprite*> blocks;
 	std::map<string, Text*> textLabels;
 
-	// block sprites
-	/*Sprite* blockBlue;
-	Sprite* blockCyan;
-	Sprite* blockGreen;
-	Sprite* blockOrange;
-	Sprite* blockPurple;
-	Sprite* blockRed;
-	Sprite* blockYellow;*/
-
+	// sound and music
 	Sound* music;
-	Sound* rotateSound;
+	Sound* gameOverMusic;
+	Sound* soundEffects[7];
 
 	// drawing options
 	bool showGrid = false;
 
 	// line display fading
 	int alpha = 0;
-	bool fadeIn = false;
+	bool fadeIn = true;
 	bool fadeCompleted = false;
 
 	// fonts
 	TTF_Font* arial_24;
 	TTF_Font* arial_48;
 
-	// functions	
+	// functions
 	
 	// drawing functions
 	void DrawBoard();
 	void DrawTetromino(bool nextPiece);
-
 	void FadeLineDisplay();
 	void DrawStats();
-
 };

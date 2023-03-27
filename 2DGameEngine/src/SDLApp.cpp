@@ -10,60 +10,9 @@ SDLApp::SDLApp(int width, int height)
 {
 	InitializeSDL(width, height);	
 
-	// load fonts
-	//arial_24 = TTF_OpenFont("assets/fonts/arial.ttf", 24);
-	//arial_48 = TTF_OpenFont("assets/fonts/arial.ttf", 48);
-
-	/*
-	if (arial_24 == nullptr || arial_48 == nullptr)
-	{
-		cout << TTF_GetError() << endl;
-	}*/
-
 	// Start the main menu
-
 	gameState = MAIN_MENU;
 	mainMenu = new MainMenu();
-
-	//alpha = 0;
-	//fadeIn = true;	
-}
-
-SDLApp::~SDLApp()
-{
-	/*
-	if (game != nullptr)
-	{
-		delete game;
-	}
-
-	// free text from heap
-	delete nextPieceLabel;
-	delete scoreLabel;
-	delete scoreValue;
-	delete levelLabel;
-	delete levelValue;
-	delete linesLabel;
-	delete linesValue;
-	delete placedLabel;
-	delete placedValue;
-	delete gameOverText;
-
-	// free sprites from heap
-	delete blockBlue;
-	delete blockCyan;
-	delete blockGreen;
-	delete blockOrange;
-	delete blockPurple;
-	delete blockRed;
-	delete blockYellow;
-	
-	delete mainMenu;*/
-
-	//delete music;
-
-	//TTF_CloseFont(arial_24);
-	//TTF_CloseFont(arial_48);
 }
 
 static SDLApp instance(WINDOW_WIDTH, WINDOW_HEIGHT);
@@ -75,61 +24,6 @@ SDLApp& SDLApp::GetInstance()
 
 void SDLApp::StartGame()
 {
-	/** Create stats panel **/
-
-	//int panelLeft = WINDOW_WIDTH / 2 + 10;
-
-	// create next piece panel
-	/*
-	int borderWith = TILE_SIZE * 5;
-	int borderHeight = TILE_SIZE * 5;
-	nextPieceBorder = { MARGIN_LEFT, MARGIN_TOP + 32, borderWith, borderHeight };
-
-	// create text lebels
-	nextPieceLabel = new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE");
-
-	scoreLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE:");
-	scoreValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 100, MARGIN_TOP + borderHeight + 64);
-
-	levelLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 128, "Level:");
-	levelValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 80, MARGIN_TOP + borderHeight + 128);
-
-	linesLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Lines Formed:");
-	linesValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 150);
-
-	placedLabel = new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 182, "Pieces Placed:");
-	placedValue = new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 182);
-
-	gameOverText = new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 2 + 50, MARGIN_TOP + borderHeight + 300, "GAME OVER!");
-	promptUserText = new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP + borderHeight + 350, "Press ESC to quit");
-
-	// make sure the renderer was created
-	if (!renderer) {
-		std::cerr << "Error creating SDL renderer." << std::endl;
-		return;
-	}
-
-	// Load block tile sprites
-	blockBlue = new Sprite("assets/images/blue.png", renderer);
-	blockCyan = new Sprite("assets/images/cyan.png", renderer);
-	blockGreen = new Sprite("assets/images/green.png", renderer);
-	blockOrange = new Sprite("assets/images/orange.png", renderer);
-	blockPurple = new Sprite("assets/images/purple.png", renderer);
-	blockRed = new Sprite("assets/images/red.png", renderer);
-	blockYellow = new Sprite("assets/images/yellow.png", renderer);
-
-	// Load sound and music
-	music = new Music("assets/sounds/Music.mp3");
-	rotateSound = new SoundEffect("assets/sounds/rotate_piece.wav");
-
-	// if everything was successful set the running state
-	gameState = RUNNING;
-
-	music->Play();
-	game = new Tetris();
-	game->LoadNextPiece();
-	*/
-
 	gameScreen = new GameScreen();
 	SetState(RUNNING);
 }
@@ -217,55 +111,6 @@ void SDLApp::ProcessInput()
 			if (gameScreen != nullptr)
 			{
 				gameScreen->HandleInput(event.key.keysym.sym);
-
-				/*
-				switch (event.key.keysym.sym)
-				{				
-					case SDLK_ESCAPE:
-						gameState = MAIN_MENU;
-						break;	
-
-					case SDLK_LEFT: case SDLK_a:
-						game->MovePieceLeft();
-						break;
-
-					case  SDLK_RIGHT: case SDLK_d:
-						game->MovePieceRight();
-						break;
-
-					case SDLK_DOWN: case SDLK_s:
-						game->MovePieceDown();
-						break;
-
-					case SDLK_UP: case SDLK_w:
-						if (!keyPressed) // restrict rotation to once per key press					
-							game->RotateCurrentPiece(true); // clockwise rotation
-							rotateSound->Play(); // play sound effect
-						break;
-
-					case SDLK_q:
-						if (!keyPressed) // restrict rotation to once per key press					
-							game->RotateCurrentPiece(false); // counter clockwise rotation
-							rotateSound->Play();
-						break;
-
-					case SDLK_e:
-						if (!keyPressed) // restrict rotation to once per key press					
-							game->RotateCurrentPiece(true); // clockwise rotation
-							rotateSound->Play();
-						break;
-
-					case SDLK_g:
-						if (!keyPressed)
-							showGrid = !showGrid;
-						break;
-
-					case SDLK_SPACE:
-						if (!keyPressed)
-							//game->IncreaseLevel();
-							game->SendPieceToBottom();
-						break;
-				}*/
 			}
 
 			keyPressed = true;
@@ -349,37 +194,7 @@ void SDLApp::Render()
 	}
 	else if(gameState != QUIT) // on the game screen
 	{
-		gameScreen->Render();
-
-		/*
-		SetRenderColor(Color::GRAY); // sets the background colour
-		SDL_RenderClear(renderer); // clears the back render buffer
-
-		// color right-hand side of window a dark grey colour
-		SetRenderColor({ 21, 21, 21, 255 });
-		SDL_RenderFillRect(renderer, &rightHandPanel);
-
-		DrawBoard();
-
-		if (game->FormedLines())
-		{
-			if (!fadeCompleted)
-				FadeLineDisplay();
-		}
-		else
-		{
-			DrawTetromino(false);
-		}
-
-		DrawTetromino(true);
-		DrawStats();
-
-		// if game over occured
-		if (game->GameOver())
-		{
-			gameOverText->Draw();
-			promptUserText->Draw();
-		}*/
+		gameScreen->Render();		
 	}
 
 	/* end of graphics draw */

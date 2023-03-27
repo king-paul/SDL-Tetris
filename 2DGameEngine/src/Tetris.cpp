@@ -78,9 +78,18 @@ Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFiel
 
 void Tetris::Update(float deltaTime)
 {
+	if (m_event == Event::GameOver)
+		return;
+
+	m_event = Null; // resets event on start of next frame
+
 	// check for game over by seeing if a piece at the top of the screen does not fit
-	m_gameOver = (m_currentPiece->posY == 0 &&
-		!PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY));
+	if (!m_gameOver && m_currentPiece->posY == 0 &&
+		!PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY))
+	{
+		m_gameOver = true;
+		m_event = Event::GameOver;
+	}
 
 	// Game Timing
 	m_timer += deltaTime;
@@ -97,6 +106,7 @@ void Tetris::Update(float deltaTime)
 		{
 			AddPieceToBoard();
 
+			m_event = Event::PieceLanded;
 			m_sendToBottom = false;
 			m_pieceCount++;
 
@@ -139,7 +149,14 @@ void Tetris::IncreaseLevel()
 		m_fallTime -= 0.1f;
 		m_level++;
 	}
+
+	m_event = Event::LevelUp;
 }
+
+/*
+void Tetris::TriggerGameOver()
+{
+}*/
 
 void Tetris::LoadNextPiece()
 {
@@ -156,19 +173,28 @@ void Tetris::LoadNextPiece()
 void Tetris::MovePieceLeft()
 {
 	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX - 1, m_currentPiece->posY))
+	{
 		m_currentPiece->posX--;
+		m_event = Event::MovePiece;
+	}
 }
 
 void Tetris::MovePieceRight()
 {
 	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX + 1, m_currentPiece->posY))
+	{
 		m_currentPiece->posX++;
+		m_event = Event::MovePiece;
+	}
 }
 
 void Tetris::MovePieceDown()
 {
 	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY + 1))
+	{
 		m_currentPiece->posY++;
+		m_event = Event::MovePiece;
+	}
 }
 
 void Tetris::RotateCurrentPiece(bool clockwise)
@@ -189,7 +215,10 @@ void Tetris::RotateCurrentPiece(bool clockwise)
 	}
 
 	if (PieceFits(&newRotation, m_currentPiece->posX, m_currentPiece->posY))
+	{
 		m_currentPiece->tiles = newRotation;
+		m_event = Event::RotatePiece;
+	}
 }
 
 bool Tetris::PieceFits(PieceType* tetromino, int posX, int posY)
@@ -261,6 +290,11 @@ void Tetris::CheckForLines()
 			}
 		}
 
+		if (m_linesFound.size() == 4)
+			m_event = Event::Tetris4Lines;
+		else if (m_linesFound.size() > 0)
+			m_event = Event::LineClear;
+
 		tilesInRow = 0;
 	}
 
@@ -285,9 +319,9 @@ void Tetris::ClearLinesFound()
 					m_playField[py][px] = m_playField[py-1][px];
 				}
 			}
-		}
-
-		m_linesFound.clear();
+		}		
+		
+		m_linesFound.clear();		
 
 		LoadNextPiece();
 	}

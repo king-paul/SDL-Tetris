@@ -50,12 +50,20 @@ GameScreen::GameScreen()
 
 	// Load sound and music
 	music = new Music("assets/sounds/Music.mp3");
-	rotateSound = new SoundEffect("assets/sounds/rotate_piece.wav");
+	gameOverMusic = new Music("assets/sounds/GameOver.mp3");
+
+	soundEffects[Event::MovePiece] = new SoundEffect("assets/sounds/move_piece.wav"); 
+	soundEffects[Event::RotatePiece] = new SoundEffect("assets/sounds/rotate_piece.wav");
+	soundEffects[Event::PieceLanded] = new SoundEffect("assets/sounds/piece_landed.wav");
+	soundEffects[Event::LineClear] = new SoundEffect("assets/sounds/line_clear.wav");
+	soundEffects[Event::Tetris4Lines] = new SoundEffect("assets/sounds/tetris_4_lines.wav");
+	soundEffects[Event::LevelUp] = new SoundEffect("assets/sounds/level_up_jingle.wav");
+	soundEffects[Event::GameOver] = new SoundEffect("assets/sounds/game_over.wav");
 
 	// if everything was successful set the running state
 	app.SetState(RUNNING);
 
-	music->Play();
+	music->Play(-1);
 	game = new Tetris();
 	game->LoadNextPiece();
 }
@@ -78,12 +86,34 @@ GameScreen::~GameScreen()
 
 	TTF_CloseFont(arial_24);
 	TTF_CloseFont(arial_48);
+
+	// delete all loaded sounds
+	delete music;
+	delete gameOverMusic;
+	for (Sound* sound : soundEffects)
+		delete sound;
 }
 
 void GameScreen::Update(float deltaTime)
 {
+	Event soundEvent = game->GetEvent();
+	if (soundEvent != Null)
+	{
+		if (soundEvent == GameOver)
+		{			
+			gameOverMusic->Play(0);
+			game->ResetEvent();
+		}
+		else
+		{
+			soundEffects[soundEvent]->Play(0);
+		}
+	}
+
 	if (game->FormedLines())
 	{
+		game->ResetEvent();
+
 		if (fadeCompleted)
 		{
 			game->ClearLinesFound();
@@ -95,7 +125,7 @@ void GameScreen::Update(float deltaTime)
 	{
 		/* Update the tetris game */
 		game->Update(deltaTime);
-	}
+	}	
 }
 
 void GameScreen::Render()
@@ -142,7 +172,9 @@ void GameScreen::HandleInput(SDL_Keycode keypressed)
 	switch (keypressed)
 	{
 		case SDLK_ESCAPE:
-			app.SetState(PAUSED);
+			//if (game->GameOver())
+				app.SetState(QUIT);			
+				//app.SetState(PAUSED);
 			break;
 
 		case SDLK_LEFT: case SDLK_a:
@@ -160,19 +192,16 @@ void GameScreen::HandleInput(SDL_Keycode keypressed)
 		case SDLK_UP: case SDLK_w:
 			if (!app.KeyPressed()) // restrict rotation to once per key press					
 				game->RotateCurrentPiece(true); // clockwise rotation
-			rotateSound->Play(); // play sound effect
 			break;
 
 		case SDLK_q:
 			if (!app.KeyPressed()) // restrict rotation to once per key press					
 				game->RotateCurrentPiece(false); // counter clockwise rotation
-			rotateSound->Play();
 			break;
 
 		case SDLK_e:
 			if (!app.KeyPressed()) // restrict rotation to once per key press					
 				game->RotateCurrentPiece(true); // clockwise rotation
-			rotateSound->Play();
 			break;
 
 		case SDLK_g:

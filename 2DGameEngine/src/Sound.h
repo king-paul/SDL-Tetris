@@ -5,7 +5,8 @@
 class Sound
 {
 public:	
-	virtual void Play() = 0;
+	virtual void Play(int loops) = 0;
+	virtual void Stop() = 0;
 };
 
 class Music : public Sound
@@ -16,16 +17,23 @@ private:
 public:
 	Music(const char* filename)
 	{
-		music = Mix_LoadMUS(filename);
+		music = Mix_LoadMUS(filename);		
+
+		//Mix_Volume(0, 128);
 		if (!music)
 		{
 			std::cout << "Music Error: " << Mix_GetError() << std::endl;
 		}
 	}
 
-	void Play() override
+	void Play(int loops = -1) override
 	{
-		Mix_PlayMusic(music, -1); // -1 = loops indefinitely
+		Mix_PlayMusic(music, loops); // -1 = loops indefinitely
+	}
+
+	void Stop() override
+	{
+		Mix_HaltMusic();
 	}
 };
 
@@ -44,8 +52,13 @@ public:
 		}
 	}
 
-	void Play() override
+	void Play(int loops = 0) override
 	{
-		Mix_PlayChannel(-1, sound, 0); // -1 = first available channel
+		Mix_PlayChannel(-1, sound, loops); // -1 = first available channel
+	}
+
+	void Stop() override
+	{
+		Mix_HaltChannel(-1);
 	}
 };

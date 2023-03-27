@@ -29,7 +29,6 @@ class SDLApp
 {
 public:
 	SDLApp(int width, int height);
-	~SDLApp();
 
 	static SDLApp& GetInstance();
 
