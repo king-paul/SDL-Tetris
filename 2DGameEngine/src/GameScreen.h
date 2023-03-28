@@ -33,7 +33,7 @@ private:
 	// panels
 	SDL_Rect field = { GRID_OFFSET_X, GRID_OFFSET_Y, COLS * TILE_SIZE, ROWS * TILE_SIZE };
 	SDL_Rect rightHandPanel{ WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT };
-	SDL_Rect nextPieceBorder;
+	SDL_Rect nextPiecePanel;
 
 	std::map<string, Sprite*> blocks;
 	std::map<string, Text*> textLabels;
@@ -55,6 +55,9 @@ private:
 	// fonts
 	TTF_Font* arial_24;
 	TTF_Font* arial_48;
+	TTF_Font* pico;
+	TTF_Font* charriot;
+	TTF_Font* digital;
 
 	// functions
 	

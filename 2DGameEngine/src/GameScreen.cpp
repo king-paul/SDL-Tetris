@@ -9,29 +9,34 @@ GameScreen::GameScreen()
 	// create next piece panel
 	int borderWith = TILE_SIZE * 5;
 	int borderHeight = TILE_SIZE * 5;
-	nextPieceBorder = { MARGIN_LEFT, MARGIN_TOP + 32, borderWith, borderHeight };
+	nextPiecePanel = { MARGIN_LEFT, MARGIN_TOP + 40, borderWith, borderHeight };
 
 	// load fonts
 	arial_24 = TTF_OpenFont("assets/fonts/arial.ttf", 24);
 	arial_48 = TTF_OpenFont("assets/fonts/arial.ttf", 48);	
+	pico = TTF_OpenFont("assets/fonts/pico.ttf", 24);
+	charriot = TTF_OpenFont("assets/fonts/charriot.ttf", 36);
+	digital = TTF_OpenFont("assets/fonts/digital-7.ttf", 36);
 
 	// create text lebels
-	textLabels.emplace("nextPieceLabel", new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE"));
+	textLabels.emplace("nextPieceLabel", new Text(renderer, charriot, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE"));
 
-	textLabels.emplace("scoreLabel", new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE:"));
-	textLabels.emplace("scoreValue", new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 100, MARGIN_TOP + borderHeight + 64));
+	textLabels.emplace("scoreLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE"));
+	textLabels.emplace("scoreValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 100, Color::LIME));
 
-	textLabels.emplace("levelLabel", new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 128, "Level:"));
-	textLabels.emplace("levelValue", new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 80, MARGIN_TOP + borderHeight + 128));
+	textLabels.emplace("levelLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Level"));
+	textLabels.emplace("levelValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 186, Color::LIME));
 
-	textLabels.emplace("linesLabel", new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Lines Formed:"));
-	textLabels.emplace("linesValue", new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 150));
+	textLabels.emplace("linesLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 246, "Lines Formed"));
+	textLabels.emplace("linesValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 284, Color::LIME));
 
-	textLabels.emplace("placedLabel", new Text(renderer, arial_24, Color::LIME, MARGIN_LEFT, MARGIN_TOP + borderHeight + 182, "Pieces Placed:"));
-	textLabels.emplace("placedValue", new Text(renderer, arial_24, Color::WHITE, MARGIN_LEFT + 180, MARGIN_TOP + borderHeight + 182));
+	textLabels.emplace("placedLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 342, "Pieces Placed"));
+	textLabels.emplace("placedValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 378, Color::LIME));
 
-	textLabels.emplace("gameOverText", new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 2 + 50, MARGIN_TOP + borderHeight + 300, "GAME OVER!"));
-	textLabels.emplace("promptUserText", new Text(renderer, arial_24, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP + borderHeight + 350, "Press ESC to quit"));
+	textLabels.emplace("gameOverText", new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 50, "GAME OVER!"));
+	textLabels.emplace("promptUserText", new Text(renderer, arial_24, Color::WHITE, WINDOW_WIDTH / 4 + 50, WINDOW_HEIGHT / 2, "Press ESC to exit"));
+
+	textLabels.emplace("pausedText", new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 32, "GAME PAUSED"));
 
 	// make sure the renderer was created
 	if (!renderer) {
@@ -50,6 +55,7 @@ GameScreen::GameScreen()
 	blocks.emplace("purple", new Sprite("assets/images/purple.png", renderer));
 	blocks.emplace("red", new Sprite("assets/images/red.png", renderer));
 	blocks.emplace("yellow", new Sprite("assets/images/yellow.png", renderer));
+	blocks.emplace("gray", new Sprite("assets/images/gray.png", renderer));
 
 	// Load sound and music
 	music = new Music("assets/sounds/Music.mp3");
@@ -63,12 +69,9 @@ GameScreen::GameScreen()
 	soundEffects[Event::LevelUp] = new SoundEffect("assets/sounds/level_up_jingle.wav");
 	soundEffects[Event::GameOver] = new SoundEffect("assets/sounds/game_over.wav");
 
-	// if everything was successful set the running state
-	app.SetState(RUNNING);
-
 	music->Play(-1);
 	game = new Tetris();
-	game->LoadNextPiece();
+	//game->LoadNextPiece();
 }
 
 GameScreen::~GameScreen()
@@ -89,8 +92,11 @@ GameScreen::~GameScreen()
 	}
 	blocks.clear();
 
+	// close fonts
 	TTF_CloseFont(arial_24);
 	TTF_CloseFont(arial_48);
+	TTF_CloseFont(pico);
+	TTF_CloseFont(charriot);
 
 	// delete all loaded sounds
 	delete music;
@@ -100,7 +106,12 @@ GameScreen::~GameScreen()
 }
 
 void GameScreen::Update(float deltaTime)
-{
+{	
+	SDLApp app = SDLApp::GetInstance();
+
+	if (game->GameOver() && app.GetState() != GAME_OVER)
+		app.SetState(GAME_OVER);
+
 	Event soundEvent = game->GetEvent();
 	if (soundEvent != Null)
 	{
@@ -126,11 +137,11 @@ void GameScreen::Update(float deltaTime)
 			fadeIn = true;
 		}
 	}
-	else if (SDLApp::GetInstance().GetState() == RUNNING)
+	else if (app.GetState() == RUNNING)
 	{
-		/* Update the tetris game */
+		// Update the tetris game
 		game->Update(deltaTime);
-	}	
+	}
 }
 
 void GameScreen::Render()
@@ -157,9 +168,9 @@ void GameScreen::Render()
 	{
 		DrawTetromino(false);
 	}
-
-	DrawTetromino(true);
+	
 	DrawStats();
+	DrawTetromino(true);
 
 	// if game over occured
 	if (game->GameOver())
@@ -167,16 +178,24 @@ void GameScreen::Render()
 		textLabels["gameOverText"]->Draw();
 		textLabels["promptUserText"]->Draw();
 	}
+	else if (app.GetState() == PAUSED)
+	{
+		textLabels["pausedText"]->Draw();
+	}
 }
 
 void GameScreen::HandleInput(SDL_Keycode keyPressed)
 {
-	SDLApp& app = SDLApp::GetInstance();;
+ 	SDLApp& app = SDLApp::GetInstance();;
 	GameState state = SDLApp::GetInstance().GetState();
 
 	if (keyPressed == SDLK_ESCAPE)
 	{
-		if(state == RUNNING)
+		if (state == GAME_OVER || game->GameOver())
+		{
+			app.SetState(MAIN_MENU);
+		}
+		else if(state == RUNNING)
 		{
 			app.SetState(PAUSED);
 			music->Stop();
@@ -188,10 +207,7 @@ void GameScreen::HandleInput(SDL_Keycode keyPressed)
 			app.SetState(RUNNING);
 			std::cout << "Game Resumed" << std::endl;
 		}
-		if (state == GAME_OVER)
-		{
-			app.SetState(MAIN_MENU);
-		}
+		
 	}
 	else if(state == RUNNING)
 	{
@@ -255,6 +271,7 @@ void GameScreen::DrawBoard()
 
 	// TODO : Add Board Background
 
+
 	if (showGrid)
 	{
 		app.SetRenderColor(Color::MAROON);
@@ -297,12 +314,12 @@ void GameScreen::DrawBoard()
 					case 6: blockToDraw = blocks["green"]; break;
 					case 7: blockToDraw = blocks["red"]; break;
 					case 8: app.SetRenderColor(Color::BLACK); break;
-					case 9: app.SetRenderColor(Color::GRAY); break;
+					case 9: blockToDraw = blocks["gray"]; break;
 				}
 
 				SDL_Rect square = { GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
 
-				if (boardValue == 8 || boardValue == 9)
+				if (boardValue == 8)
 					SDL_RenderFillRect(renderer, &square);
 				else
 					blockToDraw->Draw(&square);
@@ -329,8 +346,8 @@ void GameScreen::DrawTetromino(bool nextPiece)
 				{
 					int padding = (piece->size < 4) ? TILE_SIZE : 0;
 
-					nextTetromino[count] = { nextPieceBorder.x + (TILE_SIZE / 2) + (x * TILE_SIZE) + padding,
-											 nextPieceBorder.y + (TILE_SIZE / 2) + (y * TILE_SIZE) + padding,
+					nextTetromino[count] = { nextPiecePanel.x + (TILE_SIZE / 2) + (x * TILE_SIZE) + padding,
+											 nextPiecePanel.y + (TILE_SIZE / 2) + (y * TILE_SIZE) + padding,
 											 TILE_SIZE, TILE_SIZE };
 				}
 				else
@@ -415,19 +432,16 @@ void GameScreen::DrawStats()
 	textLabels["linesLabel"]->Draw();
 	textLabels["placedLabel"]->Draw();
 
-	/*
-	for (std::pair<string, Text*> text : textLabels)
-	{
-		if(string::compare(text.first, string("scoreValue")) == 0)
-	}*/
-
 	// draw values next to labels
 	textLabels["scoreValue"]->Draw(to_string(game->Score()).c_str());
 	textLabels["levelValue"]->Draw(to_string(game->Level()).c_str());
 	textLabels["linesValue"]->Draw(to_string(game->LinesFormed()).c_str());
 	textLabels["placedValue"]->Draw(to_string(game->PiecesPlaced()).c_str());
 
+	// draw the next piece background
 	SDLApp& app = SDLApp::GetInstance();
+	app.SetRenderColor(Color::BLACK);
+	SDL_RenderFillRect(renderer, &nextPiecePanel);
 	app.SetRenderColor(Color::WHITE);
-	SDL_RenderDrawRect(renderer, &nextPieceBorder);
+	SDL_RenderDrawRect(renderer, &nextPiecePanel);	
 }

@@ -4,7 +4,7 @@
 
 class Text
 {
-private:
+protected:
 	SDL_Renderer* m_renderer;
 	TTF_Font* m_font;
 	SDL_Color m_colour;
@@ -19,7 +19,7 @@ private:
 
 public:
 	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, const char* text = "", int xPos = 0, int yPos = 0)
-		: m_renderer(renderer), m_font(font)
+		: m_renderer(renderer), m_font(font), m_style(TTF_STYLE_NORMAL)
 	{	
 		m_colour = colour;
 		m_textLabel = nullptr;
@@ -28,8 +28,7 @@ public:
 		m_yPos = yPos;
 		m_text = text;
 
-		/* initialize text component */
-		
+		/* initialize text component */		
 		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour); // creates surface
 		m_texture = SDL_CreateTextureFromSurface(m_renderer, m_textLabel); 
 
@@ -40,7 +39,7 @@ public:
 	}
 
 	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, int xPos = 0, int yPos = 0, const char* text = "")
-		: m_renderer(renderer), m_font(font)
+		: m_renderer(renderer), m_font(font), m_style(TTF_STYLE_NORMAL)
 	{
 		m_colour = colour;
 		m_textLabel = nullptr;
@@ -79,13 +78,13 @@ public:
 		m_textBox.y = y;
 	}
 
-	void Draw()
+	virtual void Draw()
 	{
 		TTF_SetFontStyle(m_font, m_style);
 		SDL_RenderCopy(m_renderer, m_texture, NULL, &m_textBox);
 	}
 
-	void Draw(const char* text)
+	virtual void Draw(const char* text)
 	{
 		SDL_DestroyTexture(m_texture);
 		SDL_FreeSurface(m_textLabel);
@@ -100,6 +99,8 @@ public:
 		TTF_SizeText(m_font, text, &textWidth, &textHeight);
 		m_textBox = { m_xPos, m_yPos, textWidth, textHeight };
 
+		TTF_SetFontStyle(m_font, m_style);
+
 		// render the texture
 		SDL_RenderCopy(m_renderer, m_texture, NULL, &m_textBox);
 	}
@@ -107,4 +108,50 @@ public:
 	int GetWidth() { return m_textLabel->w; }
 	int GetHeight() { return m_textLabel->h; }
 
+};
+
+class TextBox : public Text
+{
+private:
+	SDL_Color m_bgColor;
+	SDL_Rect m_background;
+
+public:
+	TextBox(SDL_Renderer* renderer, TTF_Font* font, SDL_Color foreground, SDL_Color background, const char* text = "", 
+		    int xPos = 0, int yPos = 0, int width = 100, int hPadding = 10, int vPadding = 0)
+		: Text(renderer, font, foreground, text, xPos, yPos), m_bgColor(background)
+	{
+		m_background.w = width + hPadding * 2;
+		m_background.h = m_textBox.h + vPadding * 2;
+		m_background.x = m_textBox.x - hPadding;
+		m_background.y = m_textBox.y - vPadding;
+	}
+
+	TextBox(SDL_Renderer* renderer, TTF_Font* font, int xPos = 0, int yPos = 0, SDL_Color foreground = Color::WHITE, 
+			SDL_Color background = Color::BLACK, int width = 100, int hPadding = 10, int vPadding = 2, const char* text = "")
+		: Text(renderer, font, foreground, text, xPos, yPos), m_bgColor(background)
+	{
+		m_background.w = width + hPadding * 2;
+		m_background.h = m_textBox.h + vPadding * 2;
+		m_background.x = m_textBox.x - hPadding;
+		m_background.y = m_textBox.y - vPadding;
+	}
+
+	void Draw() override
+	{		
+		SDL_SetRenderDrawColor(m_renderer, m_bgColor.r, m_bgColor.g, m_bgColor.b, m_bgColor.a);
+		SDL_RenderFillRect(m_renderer, &m_background);
+		SDL_SetRenderDrawColor(m_renderer, Color::GRAY.r, Color::GRAY.g, Color::GRAY.b, Color::GRAY.a);
+		SDL_RenderDrawRect(m_renderer, &m_background);
+		Text::Draw();
+	}
+
+	virtual void Draw(const char* text) override
+	{		
+		SDL_SetRenderDrawColor(m_renderer, m_bgColor.r, m_bgColor.g, m_bgColor.b, 255);
+		SDL_RenderFillRect(m_renderer, &m_background);
+		SDL_SetRenderDrawColor(m_renderer, Color::GRAY.r, Color::GRAY.g, Color::GRAY.b, Color::GRAY.a);
+		SDL_RenderDrawRect(m_renderer, &m_background);
+		Text::Draw(text);
+	}
 };

@@ -28,6 +28,11 @@ void SDLApp::StartGame()
 	SetState(RUNNING);
 }
 
+void SDLApp::EndGame()
+{
+
+}
+
 bool SDLApp::IsRunning() const
 {
 	return gameState != QUIT;
@@ -177,6 +182,15 @@ void SDLApp::Update()
 
 	if (gameState == MAIN_MENU)
 	{
+		if (gameScreen != nullptr)
+		{
+			delete gameScreen;
+			gameScreen = nullptr;
+
+			if (mainMenu == nullptr)
+				mainMenu = new MainMenu();
+		}
+
 		mainMenu->Update();
 	}
 	else if (gameState != QUIT)
@@ -205,7 +219,6 @@ void SDLApp::Render()
 	}
 
 	/* end of graphics draw */
-
 	SDL_RenderPresent(renderer); // renders the frame in on the window
 }
 

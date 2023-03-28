@@ -40,6 +40,7 @@ public:
 	void Destroy();
 
 	void StartGame();
+	void EndGame();
 
 	// getters
 	SDL_Window* GetWindow() { return window; }
@@ -70,53 +71,7 @@ private:
 	bool keyPressed = false;
 	bool leftMouseDown = false;
 
-	//Tetris* game;
-
-	// game objects	
-	/*
-	SDL_Rect tetromino[4];
-	SDL_Rect nextTetromino[4];
-
-	// panels
-	SDL_Rect field = { GRID_OFFSET_X, GRID_OFFSET_Y, COLS * TILE_SIZE, ROWS * TILE_SIZE };
-	SDL_Rect rightHandPanel{ WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT };
-	SDL_Rect nextPieceBorder;
-
-	// block sprites
-	Sprite* blockBlue;
-	Sprite* blockCyan;
-	Sprite* blockGreen;
-	Sprite* blockOrange;
-	Sprite* blockPurple;
-	Sprite* blockRed;
-	Sprite* blockYellow;	
-
-	// drawing options
-	bool showGrid = false;
-	*/
-
 	void InitializeSDL(int width, int height);
-
-	// text labels
-	/*
-	Text* nextPieceLabel;
-	Text* scoreLabel;
-	Text* scoreValue;
-	Text* levelLabel;
-	Text* levelValue;
-	Text* linesLabel;
-	Text* linesValue;
-	Text* placedLabel;
-	Text* placedValue;
-	Text* gameOverText;
-	Text* promptUserText;
-
-	//Sounds
-	Sound* music;
-	Sound* rotateSound;
-
-	int textWidth;
-	int textHeight;*/
 };
 
 #endif

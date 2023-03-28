@@ -12,10 +12,12 @@ MainMenu::MainMenu()
 	// load fonts
 	buttonFont = TTF_OpenFont("assets/fonts/arial.ttf", 28);
 	regularFont = TTF_OpenFont("assets/fonts/arial.ttf", 28);
+	pico = TTF_OpenFont("assets/fonts/pico.ttf", 24);
+	charriot = TTF_OpenFont("assets/fonts/charriot.ttf", 48);
 
 	// create text
-	version = new Text(app.GetRenderer(), buttonFont, Color::GREEN, "VERSION 0.5", 310, 190);
-	version->SetStyle(TTF_STYLE_BOLD);
+	version = new Text(app.GetRenderer(), pico, Color::YELLOW, "VERSION 0.6", 280, 190);
+	//version->SetStyle(TTF_STYLE_BOLD);
 
 	creator = new Text(app.GetRenderer(), buttonFont, Color::RED, "Created By Paul King 2023", 230, 550);
 
@@ -27,7 +29,7 @@ MainMenu::MainMenu()
 	quitButton->SetColours(Color::RED, Color::YELLOW, Color::MAROON);
 
 	titleMusic = new Music("assets/sounds/Title.mp3");
-	titleMusic->Play(64);
+	titleMusic->Play(-1);
 }
 
 MainMenu::~MainMenu()
@@ -35,8 +37,12 @@ MainMenu::~MainMenu()
 	delete playButton;
 	delete quitButton;
 
+	delete background;
+
 	TTF_CloseFont(buttonFont);
 	TTF_CloseFont(regularFont);
+	TTF_CloseFont(pico);
+	TTF_CloseFont(charriot);
 }
 
 void MainMenu::Update()
@@ -60,9 +66,6 @@ void MainMenu::Draw()
 
 	// sets the background colour
 	//app.SetRenderColor({ 50, 50, 50, 255 });
-	//SDL_Rect source = { 0, 0, 1920, 1200 };
-	//SDL_Rect desintation{}
-	//SDL_RenderCopy(app.GetRenderer(), background->GetTexture(), &source, { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT });
 	
 	SDL_RenderClear(app.GetRenderer());
 	background->Draw(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);

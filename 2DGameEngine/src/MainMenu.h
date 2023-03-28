@@ -17,6 +17,8 @@ private:
 
 	TTF_Font* buttonFont = nullptr;
 	TTF_Font* regularFont = nullptr;
+	TTF_Font* pico = nullptr;
+	TTF_Font* charriot = nullptr;
 
 	Sprite* logo;
 	Sprite* background;

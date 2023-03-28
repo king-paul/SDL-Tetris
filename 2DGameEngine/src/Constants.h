@@ -21,7 +21,7 @@ const int GRID_OFFSET_X = 6;
 const int GRID_OFFSET_Y = 12;
 
 // right panel margins
-const int MARGIN_LEFT = WINDOW_WIDTH/2 + 100;
+const int MARGIN_LEFT = WINDOW_WIDTH/2 + 10;
 const int MARGIN_TOP = 12;
 
 #endif

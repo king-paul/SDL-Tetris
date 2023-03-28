@@ -5,7 +5,6 @@
 
 int main(int argc, char* argv[]) 
 {
-    //SDLGame::instance = nullptr;
     SDLApp& app = SDLApp::GetInstance();// new SDLGame(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     while (app.IsRunning())

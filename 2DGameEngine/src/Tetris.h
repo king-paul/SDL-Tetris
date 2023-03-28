@@ -128,5 +128,5 @@ private:
 
 	vector<int> m_linesFound; // stores row numbers where lines have been formed
 
-	Event m_event; // records last event for sound effects
+	Event m_event = Null; // records last event for sound effects
 };
