@@ -74,6 +74,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)\SDL2\include;$(SolutionDir)\libs;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\SDL2\lib\x64;$(SolutionDIr)\libs;$(LibraryPath)</LibraryPath>
+    <TargetName>paultris</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)\SDL2\include;$(SolutionDir)\libs;$(IncludePath)</IncludePath>
@@ -86,6 +87,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(SolutionDir)\SDL2\include;$(SolutionDir)\libs;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\SDL2\lib\x86;$(SolutionDIr)\libs;$(LibraryPath)</LibraryPath>
+    <TargetName>paultris</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -414,6 +416,7 @@
     <ClInclude Include="libs\lua\luaconf.h" />
     <ClInclude Include="libs\lua\lualib.h" />
     <ClInclude Include="libs\sol\sol.hpp" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\Button.h" />
     <ClInclude Include="src\Colors.h" />
     <ClInclude Include="src\Constants.h" />
@@ -566,7 +569,10 @@
     <None Include="SDL2_ttf.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="assets\fonts\arial.ttf" />
+    <ResourceCompile Include="SDL Tetris.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

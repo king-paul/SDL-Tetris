@@ -1,4 +1,9 @@
-#include <iostream>
+/*#ifndef _resource_rc
+#define _resource_rc
+
+MAINICON ICON "Icon.ico";
+
+#endif*/
 
 #include "Constants.h"
 #include "SDLApp.h"

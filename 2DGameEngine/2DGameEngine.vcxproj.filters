@@ -830,6 +830,9 @@
     <ClInclude Include="src\GameScreen.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="libs\glm\gtx\associated_min_max.inl">
@@ -1236,8 +1239,13 @@
     <None Include="libpng16-16.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Font Include="assets\fonts\arial.ttf">
+    <ResourceCompile Include="SDL Tetris.rc">
       <Filter>Resource Files</Filter>
-    </Font>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
