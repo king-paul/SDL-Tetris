@@ -16,7 +16,7 @@ MainMenu::MainMenu()
 	charriot = TTF_OpenFont("assets/fonts/charriot.ttf", 48);
 
 	// create text
-	version = new Text(app.GetRenderer(), pico, Color::YELLOW, "VERSION 0.6", 280, 190);
+	version = new Text(app.GetRenderer(), pico, Color::YELLOW, "VERSION 0.7", 280, 190);
 	//version->SetStyle(TTF_STYLE_BOLD);
 
 	creator = new Text(app.GetRenderer(), buttonFont, Color::RED, "Created By Paul King 2023", 230, 550);

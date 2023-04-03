@@ -8,6 +8,13 @@ using namespace std;
 #define FIELD_WIDTH 12
 #define FIELD_HEIGHT 18
 
+// Tetris scoring and level
+const int SINGLE_LINE_POINTS = 40;
+const int DOUBLE_LINE_POINTS = 100;
+const int TRIPLE_LINE_POINTS = 300;
+const int QUADROUPLE_LINE_POINTS = 1200;
+const int LINES_PER_LEVEL = 10;
+
 typedef array<array <bool, 4>, 4> PieceType;
 
 enum Event

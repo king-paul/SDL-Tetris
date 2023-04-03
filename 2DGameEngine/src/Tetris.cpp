@@ -107,15 +107,9 @@ void Tetris::Update(float deltaTime)
 
 			m_event = Event::PieceLanded;
 			m_sendToBottom = false;
-			m_pieceCount++;
+			m_pieceCount++;			
 
-			// if 10 pieces have been place since the start of the speed increases
-			if (m_pieceCount % 10 == 0)
-			{
-				IncreaseLevel();
-			}
-
-			m_score += 25;
+			//m_score += 25;
 
 			CheckForLines();
 
@@ -152,18 +146,13 @@ void Tetris::IncreaseLevel()
 	m_event = Event::LevelUp;
 }
 
-/*
-void Tetris::TriggerGameOver()
-{
-}*/
-
 void Tetris::LoadNextPiece()
 {
 	m_currentPiece = m_nextPiece;
 	m_currentPiece->posX = FIELD_WIDTH / 2 - 1;
 	m_currentPiece->posY = 0;
 
-	int randomPick = rand() % 7;
+	int randomPick = 0; // rand() % 7;
 
 	m_nextPiece = new Tetromino(tetrominoes[randomPick]);
 	m_nextPiece->type = randomPick;
@@ -171,7 +160,8 @@ void Tetris::LoadNextPiece()
 
 void Tetris::MovePieceLeft()
 {
-	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX - 1, m_currentPiece->posY))
+	if (m_currentPiece != nullptr && 
+		PieceFits(&m_currentPiece->tiles, m_currentPiece->posX - 1, m_currentPiece->posY))
 	{
 		m_currentPiece->posX--;
 		m_event = Event::MovePiece;
@@ -180,7 +170,8 @@ void Tetris::MovePieceLeft()
 
 void Tetris::MovePieceRight()
 {
-	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX + 1, m_currentPiece->posY))
+	if (m_currentPiece != nullptr && 
+		PieceFits(&m_currentPiece->tiles, m_currentPiece->posX + 1, m_currentPiece->posY))
 	{
 		m_currentPiece->posX++;
 		m_event = Event::MovePiece;
@@ -189,7 +180,8 @@ void Tetris::MovePieceRight()
 
 void Tetris::MovePieceDown()
 {
-	if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY + 1))
+	if (m_currentPiece != nullptr && 
+		PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY + 1))
 	{
 		m_currentPiece->posY++;
 		m_event = Event::MovePiece;
@@ -198,6 +190,9 @@ void Tetris::MovePieceDown()
 
 void Tetris::RotateCurrentPiece(bool clockwise)
 {
+	if(m_currentPiece == nullptr)
+		return;
+
 	PieceType newRotation;
 
 	// iterate through all cells/tiles in tetromino	
@@ -289,17 +284,19 @@ void Tetris::CheckForLines()
 			}
 		}
 
-		if (m_linesFound.size() == 4)
-			m_event = Event::Tetris4Lines;
-		else if (m_linesFound.size() > 0)
-			m_event = Event::LineClear;
 
 		tilesInRow = 0;
 	}
 
-	// if a line was formed incremed the score by 100 doubled by the number of lines formed
-	if (!m_linesFound.empty()) 
-		m_score += (1 << m_linesFound.size()) * 100;
+	// if one or more lines was formed apply actions
+	if (m_linesFound.size() > 0)
+	{
+		if (m_linesFound.size() == 4)
+			m_event = Event::Tetris4Lines;
+		else
+			m_event = Event::LineClear;
+	}
+
 }
 
 void Tetris::ClearLinesFound()
@@ -318,7 +315,25 @@ void Tetris::ClearLinesFound()
 					m_playField[py][px] = m_playField[py-1][px];
 				}
 			}
-		}		
+		}	
+
+
+		// Update the score if 1 or more lines is formed lines is formed
+		switch (m_linesFound.size())
+		{
+			case 1: m_score += SINGLE_LINE_POINTS * m_level; break;
+			case 2: m_score += DOUBLE_LINE_POINTS * m_level; break;
+			case 3: m_score += TRIPLE_LINE_POINTS * m_level; break;
+			case 4: m_score += QUADROUPLE_LINE_POINTS * m_level; break;
+			default: break;
+		}
+
+		// if 10 lines have been formed since the start of the level then
+		// increase the level
+		if (m_linesFormed % 10 == 0)
+		{
+			IncreaseLevel();
+		}
 		
 		m_linesFound.clear();		
 
