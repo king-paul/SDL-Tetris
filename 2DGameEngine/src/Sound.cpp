@@ -1,4 +1,4 @@
-#include "sound.h"
+#include "Sound.h"
 
 int musicVolume = 64;
 int soundVolume = 128;

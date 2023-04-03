@@ -5,7 +5,7 @@
 
 #include "Constants.h"
 #include "Colors.h"
-#include "text.h"
+#include "Text.h"
 
 #include "SDLApp.h"
 

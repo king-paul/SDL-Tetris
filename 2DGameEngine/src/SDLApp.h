@@ -1,7 +1,11 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
-#include <SDL.h>
+#ifdef __EMSCRIPTEN__
+	#include <SDL2/SDL.h>
+#else
+	#include <SDL.h>
+#endif
+
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include <SDL_mixer.h>
@@ -9,9 +13,8 @@
 #include "Tetris.h"
 #include "Constants.h"
 #include "Text.h"
-#include "Colors.h"
 #include "Sound.h"
-#include "sprite.h"
+#include "Sprite.h"
 
 class MainMenu;
 class GameScreen;
@@ -40,7 +43,6 @@ public:
 	void Destroy();
 
 	void StartGame();
-	void EndGame();
 
 	// getters
 	SDL_Window* GetWindow() { return window; }
@@ -73,5 +75,3 @@ private:
 
 	void InitializeSDL(int width, int height);
 };
-
-#endif

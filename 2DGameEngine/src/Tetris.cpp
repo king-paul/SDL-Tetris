@@ -1,5 +1,4 @@
 #include "Tetris.h"
-#include <SDL_timer.h>
 #include <iostream>
 
 Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFieldHeight(fieldHeight)

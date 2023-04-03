@@ -28,11 +28,6 @@ void SDLApp::StartGame()
 	SetState(RUNNING);
 }
 
-void SDLApp::EndGame()
-{
-
-}
-
 bool SDLApp::IsRunning() const
 {
 	return gameState != QUIT;

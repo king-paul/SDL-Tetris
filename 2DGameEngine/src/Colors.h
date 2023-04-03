@@ -1,8 +1,5 @@
 #pragma once
-
-#ifndef SDL_Color
-	#include <SDL_pixels.h>
-#endif
+#include <SDL_pixels.h>
 
 enum class ColorName
 {

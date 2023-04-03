@@ -1,9 +1,6 @@
 #pragma once
 #include <array>
 #include <vector>
-#include <time.h>
-#include <thread>
-#include <windows.h>
 
 using namespace std;
 
