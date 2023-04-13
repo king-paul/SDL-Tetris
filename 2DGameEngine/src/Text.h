@@ -17,9 +17,28 @@ protected:
 
 	SDL_Rect m_textBox;
 
+	void RefreshText(const char* text)
+	{
+		SDL_DestroyTexture(m_texture);
+		SDL_FreeSurface(m_textLabel);
+
+		TTF_SetFontStyle(m_font, m_style);
+
+		// create surface for text
+		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour);
+		// create texture from surface
+		m_texture = SDL_CreateTextureFromSurface(m_renderer, m_textLabel);
+
+		// set position and scale of the texture
+		int textWidth, textHeight;
+		TTF_SizeText(m_font, text, &textWidth, &textHeight);
+		m_textBox = { m_xPos, m_yPos, textWidth, textHeight };
+	}
+
 public:
-	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, const char* text = "", int xPos = 0, int yPos = 0)
-		: m_renderer(renderer), m_font(font), m_style(TTF_STYLE_NORMAL)
+	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, const char* text = "", 
+		 int xPos = 0, int yPos = 0, int style = TTF_STYLE_NORMAL)
+		: m_renderer(renderer), m_font(font), m_style(style)
 	{	
 		m_colour = colour;
 		m_textLabel = nullptr;
@@ -27,6 +46,8 @@ public:
 		m_xPos = xPos;
 		m_yPos = yPos;
 		m_text = text;
+
+		TTF_SetFontStyle(m_font, m_style);
 
 		/* initialize text component */		
 		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour); // creates surface
@@ -38,8 +59,9 @@ public:
 		m_textBox = { m_xPos, m_yPos, textWidth, textHeight };
 	}
 
-	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, int xPos = 0, int yPos = 0, const char* text = "")
-		: m_renderer(renderer), m_font(font), m_style(TTF_STYLE_NORMAL)
+	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, int xPos = 0, int yPos = 0, const char* text = "",
+		int style = TTF_STYLE_NORMAL)
+		: m_renderer(renderer), m_font(font), m_style(style)
 	{
 		m_colour = colour;
 		m_textLabel = nullptr;
@@ -47,6 +69,8 @@ public:
 		m_xPos = xPos;
 		m_yPos = yPos;
 		m_text = text;
+
+		TTF_SetFontStyle(m_font, m_style);
 
 		/* initialize text component */
 
@@ -65,9 +89,23 @@ public:
 		SDL_FreeSurface(m_textLabel);
 	}
 
+	// getters
+
+	int GetWidth() { return m_textLabel->w; }
+	int GetHeight() { return m_textLabel->h; }
+	SDL_Rect GetRect() { return m_textBox; }
+
+	// setters
+
+	void SetColour(SDL_Color colour) {
+		m_colour = colour;
+		RefreshText(m_text);
+	}
+	
 	void SetStyle(int style)
 	{
 		m_style = style;
+		RefreshText(m_text);
 	}
 
 	void SetPosition(int x, int y)
@@ -78,6 +116,8 @@ public:
 		m_textBox.y = y;
 	}
 
+	// draw functions
+
 	virtual void Draw()
 	{
 		TTF_SetFontStyle(m_font, m_style);
@@ -86,28 +126,12 @@ public:
 
 	virtual void Draw(const char* text)
 	{
-		SDL_DestroyTexture(m_texture);
-		SDL_FreeSurface(m_textLabel);
-
-		// create surface for text
-		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour);
-		// create texture from surface
-		m_texture = SDL_CreateTextureFromSurface(m_renderer, m_textLabel);
-
-		// set position and scale of the texture
-		int textWidth, textHeight;		
-		TTF_SizeText(m_font, text, &textWidth, &textHeight);
-		m_textBox = { m_xPos, m_yPos, textWidth, textHeight };
-
-		TTF_SetFontStyle(m_font, m_style);
+		RefreshText(text);
 
 		// render the texture
 		SDL_RenderCopy(m_renderer, m_texture, NULL, &m_textBox);
-	}
-
-	int GetWidth() { return m_textLabel->w; }
-	int GetHeight() { return m_textLabel->h; }
-
+	}	
+	
 };
 
 class TextBox : public Text

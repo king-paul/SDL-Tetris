@@ -6,10 +6,19 @@ GameScreen::GameScreen()
 	SDLApp& app = SDLApp::GetInstance();
 	renderer = app.GetRenderer();
 
+	// make sure the renderer was created
+	if (!renderer) {
+		std::cerr << "Error creating SDL renderer." << std::endl;
+		return;
+	}
+
 	// create next piece panel
 	int borderWith = TILE_SIZE * 5;
 	int borderHeight = TILE_SIZE * 5;
+	field = { GRID_OFFSET_X, GRID_OFFSET_Y, COLS * TILE_SIZE, ROWS * TILE_SIZE };
+	rightHandPanel = { WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT };
 	nextPiecePanel = { MARGIN_LEFT, MARGIN_TOP + 40, borderWith, borderHeight };
+	menuPanel = { WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 100, 350, 240 };
 
 	// load fonts
 	arial_24 = TTF_OpenFont("assets/fonts/arial.ttf", 24);
@@ -33,16 +42,20 @@ GameScreen::GameScreen()
 	textLabels.emplace("placedLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 342, "Pieces Placed"));
 	textLabels.emplace("placedValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 378, Color::LIME));
 
-	textLabels.emplace("gameOverText", new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 50, "GAME OVER!"));
-	textLabels.emplace("promptUserText", new Text(renderer, arial_24, Color::WHITE, WINDOW_WIDTH / 4 + 50, WINDOW_HEIGHT / 2, "Press ESC to exit"));
+	textLabels.emplace("gameOverText", new Text(renderer, arial_48, Color::RED, menuPanel.x, menuPanel.y, "GAME OVER!", TTF_STYLE_BOLD));
+	textLabels.emplace("scoreText", new Text(renderer, arial_48, Color::GREEN, menuPanel.x, menuPanel.y + 60, "Score:"));
 
-	textLabels.emplace("pausedText", new Text(renderer, arial_48, Color::RED, WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 32, "GAME PAUSED"));
+	textLabels.emplace("pausedText", new Text(renderer, arial_48, Color::RED, menuPanel.x, menuPanel.y, "GAME PAUSED"));// , TTF_STYLE_BOLD));
 
-	// make sure the renderer was created
-	if (!renderer) {
-		std::cerr << "Error creating SDL renderer." << std::endl;
-		return;
-	}
+	// Create buttons
+	resumeButton = new Button(arial_24, 200, 50, menuPanel.x + menuPanel.w/4, menuPanel.y + 60, " Resume");
+	restartButton = new Button(arial_24, 200, 50, menuPanel.x + menuPanel.w/4, resumeButton->Rect().y + 60, "Restart Game");
+	quitButton = new Button(arial_24, 200, 50, menuPanel.x + menuPanel.w / 4, restartButton->Rect().y + 60, " Quit Game ");
+
+	// set button colours
+	resumeButton->SetColours(Color::BLUE, Color::CYAN, Color::NAVY);// , Color::WHITE);
+	restartButton->SetColours(Color::LIME, Color::YELLOW, Color::GREEN);// , Color::BLACK);
+	quitButton->SetColours(Color::RED, Color::YELLOW, Color::MAROON);// , Color::BLACK);
 
 	// load images
 	background = new Sprite("assets/images/metal.jpg", app.GetRenderer());
@@ -71,7 +84,6 @@ GameScreen::GameScreen()
 
 	music->Play(-1);
 	game = new Tetris();
-	//game->LoadNextPiece();
 }
 
 GameScreen::~GameScreen()
@@ -84,6 +96,9 @@ GameScreen::~GameScreen()
 		delete text.second;
 	}
 	textLabels.clear();
+
+	// delete buttons
+	delete resumeButton, restartButton, quitButton;
 
 	// delete all block sprites and empty map
 	for (std::pair<string, Sprite*> blockColour : blocks)
@@ -107,7 +122,7 @@ GameScreen::~GameScreen()
 
 void GameScreen::Update(float deltaTime)
 {	
-	SDLApp app = SDLApp::GetInstance();
+	SDLApp& app = SDLApp::GetInstance();
 
 	if (game->GameOver() && app.GetState() != GAME_OVER)
 		app.SetState(GAME_OVER);
@@ -142,6 +157,25 @@ void GameScreen::Update(float deltaTime)
 		// Update the tetris game
 		game->Update(deltaTime);
 	}
+
+	// check for button clicks while game is paused or game is over
+	if (app.GetState() == PAUSED || app.GetState() == GAME_OVER)
+	{
+		if (resumeButton->Clicked() && app.GetState() == PAUSED)
+		{
+			music->Resume();
+			app.SetState(RUNNING);
+		}
+		else if (restartButton->Clicked())
+		{
+			app.StartGame();
+		}
+		else if (quitButton->Clicked())
+		{
+			app.SetState(MAIN_MENU);
+		}
+	}
+
 }
 
 void GameScreen::Render()
@@ -175,12 +209,25 @@ void GameScreen::Render()
 	// if game over occured
 	if (game->GameOver())
 	{
+		app.SetRenderColor(Color::SILVER);
+		SDL_RenderFillRect(app.GetRenderer(), &menuPanel);
 		textLabels["gameOverText"]->Draw();
-		textLabels["promptUserText"]->Draw();
+
+		char scoreText[20];
+		sprintf(scoreText, "Score: %i", game->Score());
+		textLabels["scoreText"]->Draw(scoreText);
+
+		restartButton->Draw();
+		quitButton->Draw();
 	}
 	else if (app.GetState() == PAUSED)
 	{
+		app.SetRenderColor(Color::SILVER);
+		SDL_RenderFillRect(app.GetRenderer(), &menuPanel);
 		textLabels["pausedText"]->Draw();
+		resumeButton->Draw();
+		restartButton->Draw();
+		quitButton->Draw();
 	}
 }
 
@@ -198,14 +245,14 @@ void GameScreen::HandleInput(SDL_Keycode keyPressed)
 		else if(state == RUNNING)
 		{
 			app.SetState(PAUSED);
-			music->Stop();
-			std::cout << "Game Paused" << std::endl;
+			music->Pause();
+			//std::cout << "Game Paused" << std::endl;
 		}
 		else if (state == PAUSED)
 		{
-			music->Play();
+			music->Resume();
 			app.SetState(RUNNING);
-			std::cout << "Game Resumed" << std::endl;
+			//std::cout << "Game Resumed" << std::endl;
 		}
 		
 	}

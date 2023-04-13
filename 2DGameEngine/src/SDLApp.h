@@ -43,7 +43,7 @@ public:
 	bool MousePressed() { return leftMouseDown; }
 
 	// setters
-	void SetState(GameState state) { gameState = state; }
+	void SetState(GameState state);
 	//void SetRenderColor(ColorName color);
 	void SetRenderColor(SDL_Color color);
 

@@ -10,6 +10,9 @@ public:
 
 	static void VolumeUp(int amount);
 	static void VolumeDown(int amount);
+
+	virtual void Pause() { }
+	virtual void Resume() { }
 };
 
 class Music : public Sound
@@ -39,12 +42,20 @@ public:
 	{
 		Mix_HaltMusic();
 	}
+
+	void Pause() override
+	{ 
+		Mix_PauseMusic(); 
+	}
+	void Resume() override 
+	{ 
+		Mix_ResumeMusic();
+	}
 	
 	static void VolumeUp(int amount);
 	static void VolumeDown(int amount);
 
 	static void ToggleMute();
-	
 };
 
 class SoundEffect : public Sound
@@ -71,7 +82,7 @@ public:
 
 	void Stop() override
 	{
-		Mix_HaltChannel(-1);
+		Mix_HaltChannel(-1);		
 	}
 	
 	static void VolumeUp(int amount);

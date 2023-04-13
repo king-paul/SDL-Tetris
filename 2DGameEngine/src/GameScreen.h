@@ -6,8 +6,7 @@
 #include "Text.h"
 #include "Sprite.h"
 #include "Sound.h"
-
-class SDLApp;
+#include "Button.h"
 
 class GameScreen
 {
@@ -30,9 +29,15 @@ private:
 	SDL_Rect nextTetromino[4];
 
 	// panels
-	SDL_Rect field = { GRID_OFFSET_X, GRID_OFFSET_Y, COLS * TILE_SIZE, ROWS * TILE_SIZE };
-	SDL_Rect rightHandPanel{ WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT };
+	SDL_Rect field;
+	SDL_Rect rightHandPanel;
 	SDL_Rect nextPiecePanel;
+	SDL_Rect menuPanel;
+
+	// buttons
+	Button* resumeButton;
+	Button* quitButton;
+	Button* restartButton;
 
 	std::map<string, Sprite*> blocks;
 	std::map<string, Text*> textLabels;

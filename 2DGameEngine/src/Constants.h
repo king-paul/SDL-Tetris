@@ -1,5 +1,7 @@
 #pragma once
 
+const float VERSION = 0.7f;
+
 // SDL Constants
 const int WINDOW_WIDTH = 800;
 const int WINDOW_HEIGHT = 600;

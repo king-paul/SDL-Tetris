@@ -1,6 +1,8 @@
 #include "SDLApp.h"
 #include "MainMenu.h"
 
+#include <string>
+
 MainMenu::MainMenu()
 {
 	SDLApp& app = SDLApp::GetInstance();
@@ -13,10 +15,13 @@ MainMenu::MainMenu()
 	buttonFont = TTF_OpenFont("assets/fonts/arial.ttf", 28);
 	regularFont = TTF_OpenFont("assets/fonts/arial.ttf", 28);
 	pico = TTF_OpenFont("assets/fonts/pico.ttf", 24);
-	charriot = TTF_OpenFont("assets/fonts/charriot.ttf", 48);
+	charriot = TTF_OpenFont("assets/fonts/charriot.ttf", 48);	
 
 	// create text
-	version = new Text(app.GetRenderer(), pico, Color::YELLOW, "VERSION 0.7", 280, 190);
+	char versionText[13];
+	sprintf(versionText, "VERSION %.1f", VERSION);
+
+	version = new Text(app.GetRenderer(), pico, Color::YELLOW, versionText, 280, 190);
 	//version->SetStyle(TTF_STYLE_BOLD);
 
 	creator = new Text(app.GetRenderer(), buttonFont, Color::RED, "Created By Paul King 2023", 230, 550);

@@ -24,7 +24,12 @@ SDLApp& SDLApp::GetInstance()
 
 void SDLApp::StartGame()
 {
-	gameScreen = new GameScreen();
+	if (gameScreen != nullptr)
+	{
+		delete gameScreen;
+		gameScreen = nullptr;
+	}
+
 	SetState(RUNNING);
 }
 
@@ -206,11 +211,13 @@ void SDLApp::Render()
 	/* draw graphics on screen */
 	if (gameState == MAIN_MENU)
 	{
-		mainMenu->Draw();
+		if(mainMenu != nullptr)
+			mainMenu->Draw();
 	}
 	else if(gameState != QUIT) // on the game screen
 	{
-		gameScreen->Render();		
+		if(gameScreen != nullptr)
+			gameScreen->Render();		
 	}
 
 	/* end of graphics draw */
@@ -237,4 +244,28 @@ void SDLApp::Destroy()
 void SDLApp::SetRenderColor(SDL_Color color)
 {
 	SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+}
+
+void SDLApp::SetState(GameState state)
+{
+	gameState = state; 
+
+	if (gameState == MAIN_MENU)
+	{
+		if (gameScreen != nullptr)
+		{
+			delete gameScreen;
+			gameScreen = nullptr;
+		}
+
+		if (mainMenu == nullptr)
+		{
+			mainMenu = new MainMenu();
+		}
+	}
+	else if (gameState == RUNNING)
+	{
+		if (gameScreen == nullptr)
+			gameScreen = new GameScreen();
+	}
 }

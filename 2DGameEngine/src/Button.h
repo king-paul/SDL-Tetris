@@ -8,7 +8,7 @@ class Button
 {
 public:
 	Button(TTF_Font* font, int width, int height, int posX, int posY, const char* text,
-		SDL_Color backgroundColor = Color::SILVER, SDL_Color textColour = Color::BLACK)
+		SDL_Color backgroundColor = Color::SILVER, SDL_Color textColour = Color::BLACK, int textStyle = TTF_STYLE_NORMAL)
 		: app(SDLApp::GetInstance())
 	{
 
@@ -21,7 +21,7 @@ public:
 		m_colorNormal = backgroundColor;
 
 		m_text = new Text(app.GetRenderer(), font, textColour, text);
-		m_text->SetStyle(TTF_STYLE_BOLD);
+		m_text->SetStyle(textStyle);
 
 		// position text on center of button
 		int paddingLeft = (m_background.w - m_text->GetWidth()) / 2;
@@ -34,11 +34,13 @@ public:
 		delete m_text;
 	}
 
-	void SetColours(SDL_Color normalColor, SDL_Color hoverColor, SDL_Color pressedColor)
+	void SetColours(SDL_Color normalColor, SDL_Color hoverColor, SDL_Color pressedColor, 
+		SDL_Color textColour = Color::BLACK)
 	{
 		m_colorNormal = normalColor;
 		m_colourHover = hoverColor;
 		m_colourPressed = pressedColor;
+		m_text->SetColour(textColour);
 	}
 
 	void Draw()
@@ -94,6 +96,8 @@ public:
 
 		return false;
 	}
+
+	SDL_Rect Rect() { return m_background; }
 
 private:
 
