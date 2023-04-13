@@ -1,14 +1,6 @@
 #pragma once
 
-#ifdef __EMSCRIPTEN__
-	#include <SDL2/SDL.h>
-#else
-	#include <SDL.h>
-#endif
-
-#include <SDL_image.h>
-#include <SDL_ttf.h>
-#include <SDL_mixer.h>
+#include "SDL_libraries.h"
 
 #include "Tetris.h"
 #include "Constants.h"

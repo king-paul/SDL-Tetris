@@ -423,6 +423,7 @@
     <ClInclude Include="src\GameScreen.h" />
     <ClInclude Include="src\MainMenu.h" />
     <ClInclude Include="src\SDLApp.h" />
+    <ClInclude Include="src\SDL_libraries.h" />
     <ClInclude Include="src\Sound.h" />
     <ClInclude Include="src\Sprite.h" />
     <ClInclude Include="src\Tetris.h" />

@@ -1,11 +1,6 @@
 #pragma once
 
-#include <SDL.h>
 #include <iostream>
-
-#include "Constants.h"
-#include "Colors.h"
-#include "Text.h"
 
 #include "SDLApp.h"
 

@@ -1,5 +1,4 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#pragma once
 
 // SDL Constants
 const int WINDOW_WIDTH = 800;
@@ -23,5 +22,3 @@ const int GRID_OFFSET_Y = 12;
 // right panel margins
 const int MARGIN_LEFT = WINDOW_WIDTH/2 + 10;
 const int MARGIN_TOP = 12;
-
-#endif
