@@ -20,55 +20,57 @@ Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFiel
 	}
 
 	// Create the tetrominoes
-	tetrominoes[0] = Tetromino(4,
-							  {0, 1, 0, 0,
-							   0, 1, 0, 0,
-							   0, 1, 0, 0,
-							   0, 1, 0, 0 }
-							  );
 
-	tetrominoes[1] = Tetromino(3,
-							  {0, 1, 0, 0,
-							   1, 1, 1, 0,
-							   0, 0, 0, 0,
-							   0, 0, 0, 0 });
+	/* I Block
+	 * . . . .
+	 * # # # #
+	 * . . . .
+	 * . . . . */
+	tetrominoes[0] = Tetromino({-1, 0}, {0, 0}, {1, 0}, {2, 0}, 0, 4);
 
-	tetrominoes[2] = Tetromino(2,
-							  {1, 1, 0, 0,
-							   1, 1, 0, 0,
-							   0, 0, 0, 0,
-							   0, 0, 0, 0 });
+	/* T block
+	 * . # . 
+	 * # # # 
+	 * . . . */
+	tetrominoes[1] = Tetromino({ -1, 0 }, { 0, 0 }, { 0, -1 }, { 1, 0 }, 1 , 3);
 
-	tetrominoes[3] = Tetromino(3,
-							  {0, 1, 0, 0,
-							   0, 1, 0, 0,
-							   1, 1, 0, 0,
-							   0, 0, 0, 0 });
+	/* O block
+	 * . . . .
+	 * . # # .
+	 * . # # .
+	 * . . . .*/
+	tetrominoes[2] = Tetromino({0, 0}, {1, 0}, {0, 1}, {1, 1} , 2, 2);
 
-	tetrominoes[4] = Tetromino(3,
-							  {1, 0, 0, 0,
-							   1, 0, 0, 0,
-							   1, 1, 0, 0,
-							   0, 0, 0, 0 });
+	/* L block
+	 * # . . 
+	 * # # #
+	 * . . . */
+	tetrominoes[3] = Tetromino({-1 ,-1}, {-1 , 0}, { 0, 0}, { 1, 0}, 3, 3);
+	
+	/* J Block
+	* . . # 
+	* # # # 
+	* . . .	*/
+	tetrominoes[4] = Tetromino({-1, 0}, {0, 0}, {1, 0}, {1, -1}, 4), 3;
 
-	tetrominoes[5] = Tetromino(3,
-							  {1, 0, 0, 0,
-							   1, 1, 0, 0,
-							   0, 1, 0, 0,
-							   0, 0, 0, 0 });
+	/* S Block
+	* . # #
+	* # # .
+	* . . . */
+	tetrominoes[5] = Tetromino({-1 ,0 }, { 0, 0}, { 0, -1}, { 1, -1}, 5, 3);
 
-	tetrominoes[6] = Tetromino(3,
-							  {0, 1, 0, 0,
-							   1, 1, 0, 0,
-							   1, 0, 0, 0,
-							   0, 0, 0, 0 });
+	/* Z Block
+	* # # .
+	* . # #
+	* . . . */
+	tetrominoes[6] = Tetromino({-1, -1}, {0, -1}, {0, 0}, {1, 0}, 6, 3);
 
 	// seed the random generator
 	time_t theTime;
-	srand((unsigned int)time(&theTime));
+	std::srand((unsigned int)time(&theTime));
 
 	// initialize the first tetris piece
-	int randomPick = rand() % 7;
+	int randomPick = 0;// rand() % 7;
 	m_nextPiece = new Tetromino(tetrominoes[randomPick]);
 	m_nextPiece->type = randomPick;
 
@@ -84,7 +86,7 @@ void Tetris::Update(float deltaTime)
 
 	// check for game over by seeing if a piece at the top of the screen does not fit
 	if (!m_gameOver && m_currentPiece->posY == 0 &&
-		!PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY))
+		!PieceFits(m_currentPiece->positions, m_currentPiece->posX, m_currentPiece->posY))
 	{
 		m_gameOver = true;
 		m_event = Event::GameOver;
@@ -97,7 +99,7 @@ void Tetris::Update(float deltaTime)
 	if (m_timer >= (m_fallTime/10) || m_sendToBottom)
 	{
 		// if the the piece fits in the space below and move it down if it does
-		if (PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY + 1))
+		if (PieceFits(m_currentPiece->positions, m_currentPiece->posX, m_currentPiece->posY + 1))
 		{
 			m_currentPiece->posY++; // It can so do it!
 		}
@@ -107,9 +109,7 @@ void Tetris::Update(float deltaTime)
 
 			m_event = Event::PieceLanded;
 			m_sendToBottom = false;
-			m_pieceCount++;			
-
-			//m_score += 25;
+			m_pieceCount++;
 
 			CheckForLines();
 
@@ -150,9 +150,9 @@ void Tetris::LoadNextPiece()
 {
 	m_currentPiece = m_nextPiece;
 	m_currentPiece->posX = FIELD_WIDTH / 2 - 1;
-	m_currentPiece->posY = 0;
+	m_currentPiece->posY = 1;
 
-	int randomPick = 0; // rand() % 7;
+	int randomPick = rand() % 7;
 
 	m_nextPiece = new Tetromino(tetrominoes[randomPick]);
 	m_nextPiece->type = randomPick;
@@ -161,7 +161,7 @@ void Tetris::LoadNextPiece()
 void Tetris::MovePieceLeft()
 {
 	if (m_currentPiece != nullptr && 
-		PieceFits(&m_currentPiece->tiles, m_currentPiece->posX - 1, m_currentPiece->posY))
+		PieceFits(m_currentPiece->positions, m_currentPiece->posX - 1, m_currentPiece->posY))
 	{
 		m_currentPiece->posX--;
 		m_event = Event::MovePiece;
@@ -171,7 +171,7 @@ void Tetris::MovePieceLeft()
 void Tetris::MovePieceRight()
 {
 	if (m_currentPiece != nullptr && 
-		PieceFits(&m_currentPiece->tiles, m_currentPiece->posX + 1, m_currentPiece->posY))
+		PieceFits(m_currentPiece->positions, m_currentPiece->posX + 1, m_currentPiece->posY))
 	{
 		m_currentPiece->posX++;
 		m_event = Event::MovePiece;
@@ -181,7 +181,7 @@ void Tetris::MovePieceRight()
 void Tetris::MovePieceDown()
 {
 	if (m_currentPiece != nullptr && 
-		PieceFits(&m_currentPiece->tiles, m_currentPiece->posX, m_currentPiece->posY + 1))
+		PieceFits(m_currentPiece->positions, m_currentPiece->posX, m_currentPiece->posY + 1))
 	{
 		m_currentPiece->posY++;
 		m_event = Event::MovePiece;
@@ -195,62 +195,61 @@ void Tetris::RotateCurrentPiece(bool clockwise)
 
 	PieceType newRotation;
 
-	// iterate through all cells/tiles in tetromino	
-	for (int y = 0; y < m_currentPiece->size; y++)
+	if (m_currentPiece->type == 0) // I block
 	{
-		for (int x = 0; x < m_currentPiece->size; x++)		
+		newRotation = Rotate2dArray(clockwise);
+	}
+	else if (m_currentPiece->type == 2) // O block
+	{
+		newRotation = m_currentPiece->positions;
+	}
+	else
+	{
+		for (int i = 0; i < m_currentPiece->positions.size(); i++)
 		{
-			// rotate each tile left or right depending on value of clockwise
-			if(clockwise)
-				newRotation[x][m_currentPiece->size - y - 1] = m_currentPiece->tiles[y][x];
+			if (clockwise)
+			{
+				newRotation[i].x = m_currentPiece->positions[i].y;
+				newRotation[i].y = -m_currentPiece->positions[i].x;
+			}
 			else
-				newRotation[m_currentPiece->size - x - 1][y] = m_currentPiece->tiles[y][x];
+			{
+				newRotation[i].x = -m_currentPiece->positions[i].y;
+				newRotation[i].y = m_currentPiece->positions[i].x;
+			}
+
 		}
 	}
 
-	if (PieceFits(&newRotation, m_currentPiece->posX, m_currentPiece->posY))
+	if (PieceFits(newRotation, m_currentPiece->posX, m_currentPiece->posY))
 	{
-		m_currentPiece->tiles = newRotation;
+		m_currentPiece->positions = newRotation;
 		m_event = Event::RotatePiece;
 	}
 }
 
-bool Tetris::PieceFits(PieceType* tetromino, int posX, int posY)
+bool Tetris::PieceFits(PieceType tetromino, int posX, int posY)
 {
-	// itereate though all of the 16 spaces in the tetromino
-	for (int px = 0; px < 4; px++)
+	for (Coord tile : tetromino)
 	{
-		for (int py = 0; py < 4; py++)
-		{
-			// check the piece coordinates are not out of bounds
-			if (posX + px >= 0 && posX + px < FIELD_WIDTH)
-			{
-				if (posY + py >= 0 && posY + py < FIELD_HEIGHT)
-				{
-					// checks if a tile in the tetromino is colliding with something by
-					// seeing if the index in the tetromino has a tile and 
-					// the position on the field at the coordinates space has a tile				
-					if ((*tetromino)[py][px] == true && m_playField[posY + py][posX + px] != 0)
-						return false; // fail on first hit
-				}
-			}
-		}
+		// check the piece coordinates are not out of bounds
+		if (posX + tile.x < 0 || posX + tile.x > FIELD_WIDTH ||
+			posY + tile.y < 0 || posY + tile.y > FIELD_HEIGHT)
+			return false;
+
+		// checks if a tile in the tetromino is colliding with something
+		if (m_playField[posY + tile.y][posX + tile.x] != 0)
+			return false;		
 	}
 
-	return true;
+	return true; // all spaces were vacant
 }
 
 void Tetris::AddPieceToBoard()
 {
-	// Add the current piece into the field
-	for (int px = 0; px < 4; px++)
+	for (Coord tile : m_currentPiece->positions)
 	{
-		for (int py = 0; py < 4; py++)
-		{
-			// if value in the index is a tile then set the matching space in the field to that tile
-			if (m_currentPiece->tiles[py][px] == true)
-				m_playField[m_currentPiece->posY + py][m_currentPiece->posX + px] = m_currentPiece->type + 1;
-		}
+		m_playField[m_currentPiece->posY + tile.y][m_currentPiece->posX + tile.x] = m_currentPiece->type + 1;
 	}
 }
 
@@ -283,7 +282,6 @@ void Tetris::CheckForLines()
 				m_linesFormed++;
 			}
 		}
-
 
 		tilesInRow = 0;
 	}
@@ -339,4 +337,57 @@ void Tetris::ClearLinesFound()
 
 		LoadNextPiece();
 	}
+}
+
+PieceType Tetris::Rotate2dArray(bool clockwise)
+{
+	bool tetrominoArray[4][4];
+	bool rotatedArray[4][4];
+
+	// initialize 2d arrays
+	for (int y = 0; y < 4; y++)
+	{
+		for (int x = 0; x < 4; x++)
+		{
+			tetrominoArray[y][x] = false;
+			rotatedArray[y][x] = false;
+		}
+	}
+
+	// convert coordinates into array indexes
+	for (Coord tile : m_currentPiece->positions)
+	{
+		tetrominoArray[tile.y + 1] [tile.x + 1] = true;
+	}
+
+	// iterate through all cells/tiles in tetromino
+	for (int y = 0; y < 4; y++)
+	{
+		for (int x = 0; x < 4; x++)
+		{
+			// rotate each tile left or right depending on value of clockwise
+			if (clockwise)
+				rotatedArray[x][4 - y - 1] = tetrominoArray[y][x];
+			else
+				rotatedArray[4 - x - 1][y] = tetrominoArray[y][x];
+		}
+	}
+
+	PieceType newRotation;
+	int pieceIndex = 0;
+
+	// convert array back into coordinates
+	for (int y = 0; y < 4; y++)
+	{
+		for (int x = 0; x < 4; x++)
+		{
+			if (rotatedArray[y][x] == true)
+			{
+				newRotation[pieceIndex] = { x - 1, y - 1 };
+				pieceIndex++;
+			}
+		}		
+	}
+
+	return newRotation;
 }

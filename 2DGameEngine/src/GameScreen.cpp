@@ -246,13 +246,11 @@ void GameScreen::HandleInput(SDL_Keycode keyPressed)
 		{
 			app.SetState(PAUSED);
 			music->Pause();
-			//std::cout << "Game Paused" << std::endl;
 		}
 		else if (state == PAUSED)
 		{
 			music->Resume();
 			app.SetState(RUNNING);
-			//std::cout << "Game Resumed" << std::endl;
 		}
 		
 	}
@@ -382,29 +380,21 @@ void GameScreen::DrawTetromino(bool nextPiece)
 	Tetromino* piece = (nextPiece) ? game->GetNextPiece() : game->GetCurrentPiece();
 	int count = 0;
 
-	// create square locations on screen for tetromino
-	for (int y = 0; y < piece->size; y++)
+	for (int i = 0; i < piece->positions.size(); i++)
 	{
-		for (int x = 0; x < piece->size; x++)
+		if (nextPiece)
 		{
-			if (piece->tiles[y][x] == true)
-			{
-				if (nextPiece)
-				{
-					int padding = (piece->size < 4) ? TILE_SIZE : 0;
+			int padding = TILE_SIZE;
 
-					nextTetromino[count] = { nextPiecePanel.x + (TILE_SIZE / 2) + (x * TILE_SIZE) + padding,
-											 nextPiecePanel.y + (TILE_SIZE / 2) + (y * TILE_SIZE) + padding,
-											 TILE_SIZE, TILE_SIZE };
-				}
-				else
-				{
-					tetromino[count] = { piece->posX * TILE_SIZE + (x * TILE_SIZE) + GRID_OFFSET_X,
-										 piece->posY * TILE_SIZE + (y * TILE_SIZE) + GRID_OFFSET_Y + 1,
-										 TILE_SIZE, TILE_SIZE };
-				}
-				count++;
-			}
+			nextTetromino[i] = { nextPiecePanel.x + (TILE_SIZE / 2) + (piece->positions[i].x * TILE_SIZE) + padding,
+								 nextPiecePanel.y + (TILE_SIZE / 2) + (piece->positions[i].y * TILE_SIZE) + padding*2,
+								 TILE_SIZE, TILE_SIZE };
+		}
+		else
+		{
+			tetromino[i] = { piece->posX * TILE_SIZE + (piece->positions[i].x * TILE_SIZE) + GRID_OFFSET_X,
+							 piece->posY * TILE_SIZE + (piece->positions[i].y * TILE_SIZE) + GRID_OFFSET_Y + 1,
+							 TILE_SIZE, TILE_SIZE };
 		}
 	}
 

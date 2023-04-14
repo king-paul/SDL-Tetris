@@ -15,7 +15,12 @@ const int TRIPLE_LINE_POINTS = 300;
 const int QUADROUPLE_LINE_POINTS = 1200;
 const int LINES_PER_LEVEL = 10;
 
-typedef array<array <bool, 4>, 4> PieceType;
+struct Coord
+{
+	int x; int y;
+};
+
+typedef std::array<Coord, 4> PieceType;
 
 enum Event
 {
@@ -31,33 +36,55 @@ enum Event
 
 struct Tetromino
 {	
-	Tetromino() {} // default constructor
+	int posX;
+	int posY;
+	int size;
+	int type;
+
+	PieceType positions;
+
+	Tetromino() 
+	{
+		size = 3;
+		posX = 0;
+		posY = 0;
+		type = 0;
+
+	} // default constructor
 
 	Tetromino(int size, PieceType tiles) // paremeter constructor
 	{
-		this->size = size;
-		this->tiles = tiles;
+		this->size;
+		this->positions = tiles;
 
-		type = 0;
 		posX = 0;
 		posY = 0;
 	}	
+
+	Tetromino(Coord p1, Coord p2, Coord p3, Coord p4, int type, int size = 4)
+	{
+		positions[0] = p1;
+		positions[1] = p2;
+		positions[2] = p3;
+		positions[3] = p4;
+
+		this->type = type;
+		this->size = size;
+
+		posX = 0;
+		posY = 0;
+	}
 	
 	Tetromino(const Tetromino& ref) // copy constructor
 	{
-		size = ref.size;
-		tiles = ref.tiles;
-		type = ref.type;
 		posX = ref.posX;
 		posY = ref.posY;
-	}
-	
-	PieceType tiles;
-	int size;
 
-	int type;
-	int posX;
-	int posY;
+		positions[0] = ref.positions[0];
+		positions[1] = ref.positions[1];
+		positions[2] = ref.positions[2];
+		positions[3] = ref.positions[3];
+	}
 	
 };
 
@@ -103,12 +130,13 @@ public:
 	/// <param name="posX">The x position of the piece's top left</param>
 	/// <param name="posY">The y position of the piece's top left</param>
 	/// <returns>true of false based on whether the piece fits</returns>
-	bool PieceFits(PieceType* tetromino, int posX, int posY);
+	bool PieceFits(PieceType tetromino, int posX, int posY);
 
 private:	
 
 	void AddPieceToBoard();
 	void CheckForLines();
+	PieceType Rotate2dArray(bool clockwise);
 
 	Tetromino* m_currentPiece;
 	Tetromino* m_nextPiece;
