@@ -70,7 +70,7 @@ Tetris::Tetris(int fieldWidth, int fieldHeight) : nFieldWidth(fieldWidth), nFiel
 	std::srand((unsigned int)time(&theTime));
 
 	// initialize the first tetris piece
-	int randomPick = 0;// rand() % 7;
+	int randomPick = rand() % 7;
 	m_nextPiece = new Tetromino(tetrominoes[randomPick]);
 	m_nextPiece->type = randomPick;
 
@@ -85,7 +85,7 @@ void Tetris::Update(float deltaTime)
 	m_event = Null; // resets event on start of next frame
 
 	// check for game over by seeing if a piece at the top of the screen does not fit
-	if (!m_gameOver && m_currentPiece->posY == 0 &&
+	if (!m_gameOver && m_currentPiece->posY <= 1 &&
 		!PieceFits(m_currentPiece->positions, m_currentPiece->posX, m_currentPiece->posY))
 	{
 		m_gameOver = true;
