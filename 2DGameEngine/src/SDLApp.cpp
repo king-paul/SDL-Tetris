@@ -113,14 +113,17 @@ void SDLApp::ProcessInput()
 
 				case SDLK_MINUS:					
 					Sound::VolumeDown(8);
-				break;
-
+				break;				
 
 				// if game is running, handle the move input
 				default:
 					if (gameScreen != nullptr)
 					{
 						gameScreen->HandleInput(keyCode);
+					}
+					else if (mainMenu != nullptr)
+					{
+						mainMenu->HandleInput(keyCode);
 					}
 				break;
 			}

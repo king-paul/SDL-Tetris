@@ -25,7 +25,7 @@ protected:
 		TTF_SetFontStyle(m_font, m_style);
 
 		// create surface for text
-		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour);
+		m_textLabel = TTF_RenderText_Blended_Wrapped(m_font, text, m_colour, 600);
 		// create texture from surface
 		m_texture = SDL_CreateTextureFromSurface(m_renderer, m_textLabel);
 
@@ -50,13 +50,16 @@ public:
 		TTF_SetFontStyle(m_font, m_style);
 
 		/* initialize text component */		
-		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour); // creates surface
-		m_texture = SDL_CreateTextureFromSurface(m_renderer, m_textLabel); 
+		//m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour); // creates surface
+		m_textLabel = TTF_RenderText_Blended(m_font, text, m_colour);
+		m_texture = SDL_CreateTextureFromSurface(m_renderer, m_textLabel);
 
 		// set position and scale of the texture
 		int textWidth, textHeight;
-		TTF_SizeText(m_font, text, &textWidth, &textHeight);
-		m_textBox = { m_xPos, m_yPos, textWidth, textHeight };
+		TTF_SizeText(m_font, text, &textWidth, &textHeight);		
+
+		m_textBox = { m_xPos, m_yPos, textWidth, textHeight };		
+		
 	}
 
 	Text(SDL_Renderer* renderer, TTF_Font* font, SDL_Color colour = Color::WHITE, int xPos = 0, int yPos = 0, const char* text = "",
