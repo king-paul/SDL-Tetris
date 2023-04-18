@@ -1,0 +1,484 @@
+#include "GameScreen.h"
+#include "SDLApp.h"
+
+GameScreen::GameScreen()
+{
+	SDLApp& app = SDLApp::GetInstance();
+	renderer = app.GetRenderer();
+
+	// make sure the renderer was created
+	if (!renderer) {
+		std::cerr << "Error creating SDL renderer." << std::endl;
+		return;
+	}
+
+	// create next piece panel
+	int borderWith = TILE_SIZE * 5;
+	int borderHeight = TILE_SIZE * 5;
+	field = { GRID_OFFSET_X, GRID_OFFSET_Y, COLS * TILE_SIZE, ROWS * TILE_SIZE };
+	rightHandPanel = { WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT };
+	nextPiecePanel = { MARGIN_LEFT, MARGIN_TOP + 40, borderWith, borderHeight };
+	menuPanel = { WINDOW_WIDTH / 4, WINDOW_HEIGHT / 2 - 100, 350, 240 };
+
+	// load fonts
+	arial_24 = TTF_OpenFont("assets/fonts/arial.ttf", 24);
+	arial_48 = TTF_OpenFont("assets/fonts/arial.ttf", 48);	
+	pico = TTF_OpenFont("assets/fonts/pico.ttf", 24);
+	charriot = TTF_OpenFont("assets/fonts/charriot.ttf", 36);
+	digital = TTF_OpenFont("assets/fonts/digital-7.ttf", 36);
+
+	// create text lebels
+	textLabels.emplace("nextPieceLabel", new Text(renderer, charriot, Color::YELLOW, MARGIN_LEFT, MARGIN_TOP, "NEXT PIECE"));
+
+	textLabels.emplace("scoreLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 64, "SCORE"));
+	textLabels.emplace("scoreValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 100, Color::LIME));
+
+	textLabels.emplace("levelLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 150, "Level"));
+	textLabels.emplace("levelValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 186, Color::LIME));
+
+	textLabels.emplace("linesLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 246, "Lines Formed"));
+	textLabels.emplace("linesValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 284, Color::LIME));
+
+	textLabels.emplace("placedLabel", new Text(renderer, charriot, Color::WHITE, MARGIN_LEFT, MARGIN_TOP + borderHeight + 342, "Pieces Placed"));
+	textLabels.emplace("placedValue", new TextBox(renderer, digital, MARGIN_LEFT + 10, MARGIN_TOP + borderHeight + 378, Color::LIME));
+
+	textLabels.emplace("gameOverText", new Text(renderer, arial_48, Color::RED, menuPanel.x, menuPanel.y, "GAME OVER!", TTF_STYLE_BOLD));
+	textLabels.emplace("scoreText", new Text(renderer, arial_48, Color::GREEN, menuPanel.x, menuPanel.y + 60, "Score:"));
+
+	textLabels.emplace("pausedText", new Text(renderer, arial_48, Color::RED, menuPanel.x, menuPanel.y, "GAME PAUSED"));// , TTF_STYLE_BOLD));
+
+	// Create buttons
+	resumeButton = new Button(arial_24, 200, 50, menuPanel.x + menuPanel.w/4, menuPanel.y + 60, " Resume");
+	restartButton = new Button(arial_24, 200, 50, menuPanel.x + menuPanel.w/4, resumeButton->Rect().y + 60, "Restart Game");
+	quitButton = new Button(arial_24, 200, 50, menuPanel.x + menuPanel.w / 4, restartButton->Rect().y + 60, " Quit Game ");
+
+	// set button colours
+	resumeButton->SetColours(Color::BLUE, Color::CYAN, Color::NAVY);// , Color::WHITE);
+	restartButton->SetColours(Color::LIME, Color::YELLOW, Color::GREEN);// , Color::BLACK);
+	quitButton->SetColours(Color::RED, Color::YELLOW, Color::MAROON);// , Color::BLACK);
+
+	// load images
+	background = new Sprite("assets/images/metal.jpg", app.GetRenderer());
+
+	// Load block tile sprites
+	blocks.emplace("blue", new Sprite("assets/images/blue.png", renderer));
+	blocks.emplace("cyan", new Sprite("assets/images/cyan.png", renderer));
+	blocks.emplace("green", new Sprite("assets/images/green.png", renderer));
+	blocks.emplace("orange", new Sprite("assets/images/orange.png", renderer));
+	blocks.emplace("purple", new Sprite("assets/images/purple.png", renderer));
+	blocks.emplace("red", new Sprite("assets/images/red.png", renderer));
+	blocks.emplace("yellow", new Sprite("assets/images/yellow.png", renderer));
+	blocks.emplace("gray", new Sprite("assets/images/gray.png", renderer));
+
+	// Load sound and music
+	music = new Music("assets/sounds/Music.mp3");
+	gameOverMusic = new Music("assets/sounds/GameOver.mp3");
+
+	soundEffects[Event::MovePiece] = new SoundEffect("assets/sounds/move_piece.wav"); 
+	soundEffects[Event::RotatePiece] = new SoundEffect("assets/sounds/rotate_piece.wav");
+	soundEffects[Event::PieceLanded] = new SoundEffect("assets/sounds/piece_landed.wav");
+	soundEffects[Event::LineClear] = new SoundEffect("assets/sounds/line_clear.wav");
+	soundEffects[Event::Tetris4Lines] = new SoundEffect("assets/sounds/tetris_4_lines.wav");
+	soundEffects[Event::LevelUp] = new SoundEffect("assets/sounds/level_up_jingle.wav");
+	soundEffects[Event::GameOver] = new SoundEffect("assets/sounds/game_over.wav");
+
+	music->Play(-1);
+	game = new Tetris();
+}
+
+GameScreen::~GameScreen()
+{
+	delete background;
+
+	// delete all text labels and empty map
+	for (std::pair<string, Text*> text : textLabels)
+	{
+		delete text.second;
+	}
+	textLabels.clear();
+
+	// delete buttons
+	delete resumeButton, restartButton, quitButton;
+
+	// delete all block sprites and empty map
+	for (std::pair<string, Sprite*> blockColour : blocks)
+	{
+		delete blockColour.second;
+	}
+	blocks.clear();
+
+	// close fonts
+	TTF_CloseFont(arial_24);
+	TTF_CloseFont(arial_48);
+	TTF_CloseFont(pico);
+	TTF_CloseFont(charriot);
+
+	// delete all loaded sounds
+	delete music;
+	delete gameOverMusic;
+	for (Sound* sound : soundEffects)
+		delete sound;
+}
+
+void GameScreen::Update(float deltaTime)
+{	
+	SDLApp& app = SDLApp::GetInstance();
+
+	if (game->GameOver() && app.GetState() != GAME_OVER)
+		app.SetState(GAME_OVER);
+
+	Event soundEvent = game->GetEvent();
+	if (soundEvent != Null)
+	{
+		if (soundEvent == GameOver)
+		{			
+			gameOverMusic->Play(0);
+			game->ResetEvent();
+		}
+		else
+		{
+			soundEffects[soundEvent]->Play();
+		}
+	}
+
+	if (game->FormedLines())
+	{
+		game->ResetEvent();
+
+		if (fadeCompleted)
+		{
+			game->ClearLinesFound();
+			fadeCompleted = false;
+			fadeIn = true;
+		}
+	}
+	else if (app.GetState() == RUNNING)
+	{
+		// Update the tetris game
+		game->Update(deltaTime);
+	}
+
+	// check for button clicks while game is paused or game is over
+	if (app.GetState() == PAUSED || app.GetState() == GAME_OVER)
+	{
+		if (resumeButton->Clicked() && app.GetState() == PAUSED)
+		{
+			music->Resume();
+			app.SetState(RUNNING);
+		}
+		else if (restartButton->Clicked())
+		{
+			app.StartGame();
+		}
+		else if (quitButton->Clicked())
+		{
+			app.SetState(MAIN_MENU);
+		}
+	}
+
+}
+
+void GameScreen::Render()
+{
+	SDLApp& app = SDLApp::GetInstance();
+
+	app.SetRenderColor(Color::GRAY); // sets the background colour
+	SDL_RenderClear(renderer); // clears the back render buffer
+
+	background->Draw(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT); // draw background image
+
+	// color right-hand side of window a dark grey colour
+	//app.SetRenderColor({ 21, 21, 21, 255 });
+	//SDL_RenderFillRect(renderer, &rightHandPanel);
+
+	DrawBoard();
+
+	if (game->FormedLines())
+	{
+		if (!fadeCompleted)
+			FadeLineDisplay();
+	}
+	else
+	{
+		DrawTetromino(false);
+	}
+	
+	DrawStats();
+	DrawTetromino(true);
+
+	// if game over occured
+	if (game->GameOver())
+	{
+		app.SetRenderColor(Color::SILVER);
+		SDL_RenderFillRect(app.GetRenderer(), &menuPanel);
+		textLabels["gameOverText"]->Draw();
+
+		char scoreText[20];
+		sprintf(scoreText, "Score: %i", game->Score());
+		textLabels["scoreText"]->Draw(scoreText);
+
+		restartButton->Draw();
+		quitButton->Draw();
+	}
+	else if (app.GetState() == PAUSED)
+	{
+		app.SetRenderColor(Color::SILVER);
+		SDL_RenderFillRect(app.GetRenderer(), &menuPanel);
+		textLabels["pausedText"]->Draw();
+		resumeButton->Draw();
+		restartButton->Draw();
+		quitButton->Draw();
+	}
+}
+
+void GameScreen::HandleInput(SDL_Keycode keyPressed)
+{
+ 	SDLApp& app = SDLApp::GetInstance();;
+	GameState state = SDLApp::GetInstance().GetState();
+
+	if (keyPressed == SDLK_ESCAPE)
+	{
+		if (state == GAME_OVER || game->GameOver())
+		{
+			app.SetState(MAIN_MENU);
+		}
+		else if(state == RUNNING)
+		{
+			app.SetState(PAUSED);
+			music->Pause();
+		}
+		else if (state == PAUSED)
+		{
+			music->Resume();
+			app.SetState(RUNNING);
+		}
+		
+	}
+	else if(state == RUNNING)
+	{
+		switch (keyPressed)
+		{
+			case SDLK_p:
+
+				break;
+
+			case SDLK_LEFT: case SDLK_a:
+					game->MovePieceLeft();
+				break;
+
+			case SDLK_RIGHT: case SDLK_d:
+					game->MovePieceRight();
+				break;
+
+			case SDLK_DOWN: case SDLK_s:
+					game->MovePieceDown();
+				break;
+
+			case SDLK_UP: case SDLK_w:
+				if (!app.KeyPressed()) // restrict rotation to once per key press		
+					game->RotateCurrentPiece(true); // clockwise rotation
+				break;
+
+			case SDLK_q:
+				if (!app.KeyPressed()) // restrict rotation to once per key press
+					game->RotateCurrentPiece(false); // counter clockwise rotation
+				break;
+
+			case SDLK_e:
+				if (!app.KeyPressed()) // restrict rotation to once per key press
+					game->RotateCurrentPiece(true); // clockwise rotation
+				break;
+
+			case SDLK_g:
+				if (!app.KeyPressed())
+					showGrid = !showGrid;
+				break;
+
+			case SDLK_SPACE:
+				if (!app.KeyPressed())
+					//game->IncreaseLevel();
+					game->SendPieceToBottom();
+				break;
+
+			case SDLK_m:
+				Music::ToggleMute();
+			break;
+		}
+	}
+}
+
+void GameScreen::DrawBoard()
+{
+	SDLApp& app = SDLApp::GetInstance();
+
+	app.SetRenderColor(Color::BLACK);
+	SDL_RenderFillRect(renderer, &field);
+
+	// TODO : Add Board Background
+
+
+	if (showGrid)
+	{
+		app.SetRenderColor(Color::MAROON);
+
+		// hoirzontal lines
+		for (int y = 0; y < ROWS; y++)
+		{
+			SDL_RenderDrawLine(renderer, GRID_OFFSET_X + 1, GRID_OFFSET_Y + y * TILE_SIZE,
+				GRID_OFFSET_X - 1 + TILE_SIZE * COLS, GRID_OFFSET_Y + y * TILE_SIZE);
+		}
+
+		//vertical lines
+		for (int x = 0; x < COLS; x++)
+		{
+			SDL_RenderDrawLine(renderer, GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + 1,
+				GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y - 1 + ROWS * TILE_SIZE);
+		}
+	}
+
+	auto gameField = game->GetField();
+
+	Sprite* blockToDraw = nullptr;
+
+	// draw coloured squares
+	for (int y = 0; y < ROWS; y++)
+	{
+		for (int x = 0; x < COLS; x++)
+		{
+			int boardValue = game->GetBoardValue(x, y);
+
+			if (boardValue != 0)
+			{
+				switch (boardValue)
+				{					
+					case 1: blockToDraw = blocks["cyan"]; break;
+					case 2: blockToDraw = blocks["purple"]; break;
+					case 3: blockToDraw = blocks["yellow"]; break;
+					case 4: blockToDraw = blocks["blue"]; break;
+					case 5: blockToDraw = blocks["orange"]; break;
+					case 6: blockToDraw = blocks["green"]; break;
+					case 7: blockToDraw = blocks["red"]; break;
+					case 8: app.SetRenderColor(Color::BLACK); break;
+					case 9: blockToDraw = blocks["gray"]; break;
+				}
+
+				SDL_Rect square = { GRID_OFFSET_X + x * TILE_SIZE, GRID_OFFSET_Y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
+
+				if (boardValue == 8)
+					SDL_RenderFillRect(renderer, &square);
+				else
+					blockToDraw->Draw(&square);
+
+			}
+		}
+	}
+
+}
+
+void GameScreen::DrawTetromino(bool nextPiece)
+{
+	Tetromino* piece = (nextPiece) ? game->GetNextPiece() : game->GetCurrentPiece();
+	int count = 0;
+
+	for (int i = 0; i < piece->positions.size(); i++)
+	{
+		if (nextPiece)
+		{
+			int padding = TILE_SIZE;
+
+			nextTetromino[i] = { nextPiecePanel.x + (TILE_SIZE / 2) + (piece->positions[i].x * TILE_SIZE) + padding,
+								 nextPiecePanel.y + (TILE_SIZE / 2) + (piece->positions[i].y * TILE_SIZE) + padding*2,
+								 TILE_SIZE, TILE_SIZE };
+		}
+		else
+		{
+			tetromino[i] = { piece->posX * TILE_SIZE + (piece->positions[i].x * TILE_SIZE) + GRID_OFFSET_X,
+							 piece->posY * TILE_SIZE + (piece->positions[i].y * TILE_SIZE) + GRID_OFFSET_Y + 1,
+							 TILE_SIZE, TILE_SIZE };
+		}
+	}
+
+	Sprite* blockToDraw = nullptr;
+
+	switch (piece->type)
+	{
+		case 0: blockToDraw = blocks["cyan"]; break;
+		case 1: blockToDraw = blocks["purple"]; break;
+		case 2: blockToDraw = blocks["yellow"]; break;
+		case 3: blockToDraw = blocks["blue"]; break;
+		case 4: blockToDraw = blocks["orange"]; break;
+		case 5: blockToDraw = blocks["green"]; break;
+		case 6: blockToDraw = blocks["red"]; break;
+	}
+
+	if (nextPiece)
+	{
+		for (SDL_Rect square : nextTetromino)
+		{
+			blockToDraw->Draw(&square);
+		}
+	}
+	else
+	{
+		for (SDL_Rect square : tetromino)
+		{
+			blockToDraw->Draw(&square);
+		}
+	}
+}
+
+void GameScreen::FadeLineDisplay()
+{
+	if (fadeIn)
+		alpha += 15;
+	else
+		alpha -= 15;
+
+	auto lines = game->GetLines();
+
+	// iterates through all rows where there is a line and fills them with a green rectangle
+	for (unsigned int i = 0; i < lines.size(); i++)
+	{
+		SDL_Rect line = { GRID_OFFSET_X + TILE_SIZE, GRID_OFFSET_Y + lines[i] * TILE_SIZE,
+						  TILE_SIZE * (FIELD_WIDTH - 2), TILE_SIZE };
+
+		SDL_SetRenderDrawColor(renderer, 0, 255, 0, alpha);
+		SDL_RenderFillRect(renderer, &line);
+	}
+
+	if (alpha >= 255)
+	{
+		fadeIn = false;
+		alpha = 255;
+	}
+
+	if (!fadeIn && alpha <= 0)
+	{
+		fadeCompleted = true;
+		alpha = 0;
+	}
+
+}
+
+void GameScreen::DrawStats()
+{
+	// draw text labels
+	textLabels["nextPieceLabel"]->Draw();
+	textLabels["scoreLabel"]->Draw();
+	textLabels["levelLabel"]->Draw();
+	textLabels["linesLabel"]->Draw();
+	textLabels["placedLabel"]->Draw();
+
+	// draw values next to labels
+	textLabels["scoreValue"]->Draw(to_string(game->Score()).c_str());
+	textLabels["levelValue"]->Draw(to_string(game->Level()).c_str());
+	textLabels["linesValue"]->Draw(to_string(game->LinesFormed()).c_str());
+	textLabels["placedValue"]->Draw(to_string(game->PiecesPlaced()).c_str());
+
+	// draw the next piece background
+	SDLApp& app = SDLApp::GetInstance();
+	app.SetRenderColor(Color::BLACK);
+	SDL_RenderFillRect(renderer, &nextPiecePanel);
+	app.SetRenderColor(Color::WHITE);
+	SDL_RenderDrawRect(renderer, &nextPiecePanel);	
+}
